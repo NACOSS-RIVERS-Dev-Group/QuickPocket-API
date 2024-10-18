@@ -1,18 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { User } from './user.schema';
 
 export type ReferralDocument = HydratedDocument<Referral>;
 
 @Schema({ timestamps: true })
 export class Referral {
   @Prop()
-  title: string;
+  referrer_code: string;
 
-  @Prop()
-  amount: number;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  referrer: User;
 
-  @Prop()
-  description: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: User;
 }
 
 export const ReferralSchema = SchemaFactory.createForClass(Referral);

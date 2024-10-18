@@ -13,6 +13,7 @@ import {
   NotificationSchema,
 } from 'src/schemas/notification.schema';
 import { Requests, RequestsSchema } from 'src/schemas/requests.schema';
+import { Referral, ReferralSchema } from 'src/schemas/referral.schema';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { Requests, RequestsSchema } from 'src/schemas/requests.schema';
       { name: Appointment.name, schema: AppointmentSchema },
       { name: Notification.name, schema: NotificationSchema },
       { name: Requests.name, schema: RequestsSchema },
+      { name: Referral.name, schema: ReferralSchema },
     ]),
   ],
   controllers: [UsersController],

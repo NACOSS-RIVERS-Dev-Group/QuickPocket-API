@@ -211,34 +211,59 @@ export class AuthService {
 
     // Now compare passwords before login
     if (userDB && bcrypt.compareSync(loginUserDto.password, userDB?.password)) {
-      // update last_login here
-      await this.userService.updateUser(userDB?.email_address, {
-        next_login: new Date(),
-        last_login: userDB?.next_login ?? new Date(),
-      });
+      // Now check if this account is verified
+      if (!userDB?.is_email_verified) {
+        // Verifiy account first.
+        // Send email OTP code to this email
+        // Send OTP Code here
+        const otpCode = generateOTP();
+        console.log(otpCode);
 
-      // await this.historyService.saveHistory({
-      //   status: 'success',
-      //   title: 'You logged into your Afrikunet account',
-      //   type: 'login',
-      //   email_address: loginUserDto?.email_address,
-      // });
+        const emailSent = await this.mailerService.sendMail({
+          to: userDB?.email_address,
+          subject: 'Account Verification OTP',
+          html: verificationEmailContent(otpCode, userDB?.first_name),
+        });
 
-      const usere = await this.userService.findUserByUsername(
-        userDB?.email_address,
-      );
+        await this.otpService.saveOTP({
+          email_address: userDB?.email_address,
+          code: otpCode,
+        });
 
-      const { password, ...usr } = usere;
-      const payload = {
-        sub: userDB?.email_address,
-        username: userDB?.first_name,
-      };
+        if (emailSent) {
+          return {
+            message: 'OTP email sent successfully',
+            action: 'verify account first',
+          };
+        } else {
+          return {
+            message: 'Failed to send OTP email',
+            action: 'verify account first',
+          };
+        }
+      } else {
+        // update last_login here
+        await this.userService.updateUser(userDB?.email_address, {
+          next_login: new Date(),
+          last_login: userDB?.next_login ?? new Date(),
+        });
 
-      return {
-        accessToken: await this.jwtService.signAsync(payload),
-        message: 'Logged in successfully',
-        user: usr,
-      };
+        const usere = await this.userService.findUserByUsername(
+          userDB?.email_address,
+        );
+
+        const { password, ...usr } = usere;
+        const payload = {
+          sub: userDB?.email_address,
+          username: userDB?.first_name,
+        };
+
+        return {
+          accessToken: await this.jwtService.signAsync(payload),
+          message: 'Logged in successfully',
+          user: usr,
+        };
+      }
     } else {
       throw new HttpException(
         'Incorrect credentials. Check and try again',

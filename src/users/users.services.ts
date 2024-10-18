@@ -15,6 +15,8 @@ import { AccountDeletionDTO } from './dtos/accountdeletion.dto';
 import { Requests } from 'src/schemas/requests.schema';
 // import { SocketGateway } from 'src/socket/socket.gateway';
 // import { paginate, PaginateConfig } from 'nestjs-paginate';
+import { v4 as uuidv4 } from 'uuid';
+import { Referral } from 'src/schemas/referral.schema';
 
 @Injectable()
 export class UserService {
@@ -27,7 +29,16 @@ export class UserService {
     private notificationRepository: Model<Notification>,
     @InjectModel(Requests.name)
     private requestsRepository: Model<Requests>,
+    @InjectModel(Referral.name)
+    private referralsRepository: Model<Referral>,
   ) {}
+
+  // Method to generate referral ID
+  private generateReferralId(firstName: string): string {
+    // Generate a short UUID or random string and append it to the first name
+    const uniquePart = uuidv4().slice(0, 4); // Taking the first 6 characters of UUID
+    return `${firstName}${uniquePart}`;
+  }
 
   async findAllNotifications() {
     return this.notificationRepository.find({});
@@ -54,27 +65,94 @@ export class UserService {
     };
   }
 
-  async createUser(createUserDto: CreateUserDTO): Promise<User> {
-    const encodedPassword = await encodePassword(createUserDto.password);
-    const newUser = new this.userRepository({
-      password: encodedPassword,
-      email_address: createUserDto?.email_address,
-      first_name: createUserDto?.first_name,
-      last_name: createUserDto.last_name,
-      phone_number: createUserDto?.phone_number,
-      international_phone_format: createUserDto?.international_phone_format,
-      is_profile_set: false,
-      created_at: new Date(),
-      updated_at: new Date(),
+  async createUser(createUserDto: CreateUserDTO): Promise<any> {
+    let referralId: string;
+    let isUnique = false;
+    // Check if email or password is used
+    const exists = await this.userRepository.findOne({
+      email_address: createUserDto.email_address,
     });
 
-    await new this.notificationRepository({
-      category: 'welcome',
-      title: `Welcome to QuickPocket`,
-      user: newUser?.id ?? newUser?._id,
-    }).save();
+    if (exists) {
+      throw new HttpException(
+        'Email address already in use',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    return newUser.save();
+    const phoneExists = await this.userRepository.findOne({
+      phone_number: createUserDto.phone_number,
+    });
+
+    if (phoneExists) {
+      throw new HttpException(
+        'Phone number already in use',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Now create referral code
+    while (!isUnique) {
+      referralId = this.generateReferralId(createUserDto.first_name);
+      const existingUser = await this.userRepository.findOne({
+        where: { referral_code: referralId },
+      });
+
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
+
+    if (isUnique === true) {
+      const encodedPassword = await encodePassword(createUserDto.password);
+      const newUser = await new this.userRepository({
+        password: encodedPassword,
+        email_address: createUserDto?.email_address,
+        first_name: createUserDto?.first_name,
+        last_name: createUserDto.last_name,
+        phone_number: createUserDto?.phone_number,
+        international_phone_format: createUserDto?.international_phone_format,
+        dial_code: createUserDto.dial_code,
+        referral_code: referralId,
+        is_profile_set: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }).save();
+
+      if (createUserDto.referral_code) {
+        // User added referral code. Check if it is valid and then save
+        const checkReferralCode = await this.userRepository.findOne({
+          referral_code: createUserDto.referral_code,
+        });
+
+        if (!checkReferralCode) {
+          throw new HttpException(
+            'Invalid referral code',
+            HttpStatus.NOT_FOUND,
+          );
+        } else {
+          // Now save this
+          const newReferral = await new this.referralsRepository({
+            referrer: checkReferralCode?._id ?? checkReferralCode?.id,
+            referrer_code: createUserDto.referral_code,
+            user: newUser?._id ?? newUser?.id,
+          }).save();
+
+          console.log('NEW REFERRAL RECORD  ::: ', newReferral);
+        }
+      }
+
+      await new this.notificationRepository({
+        category: 'welcome',
+        title: `Welcome to QuickPocket`,
+        user: newUser?.id ?? newUser?._id,
+      }).save();
+
+      return {
+        message: 'Operation successful',
+        data: newUser,
+      };
+    }
   }
 
   async findUserByUsername(email_address: string): Promise<User> {
@@ -289,18 +367,21 @@ export class UserService {
   async requestAccountDeletion(
     { reason }: AccountDeletionDTO,
     userId: string,
-  ): Promise<Requests> {
+  ): Promise<any> {
     try {
-      const newRequest = new this.requestsRepository({
+      const newRequest = await new this.requestsRepository({
         reason,
         requests_type: 'account_deletion',
         status: 'pending',
         user: userId,
         created_at: new Date(),
         updated_at: new Date(),
-      });
+      }).save();
 
-      return newRequest.save();
+      return {
+        message: 'Delete request submitted. Awaiting approval.',
+        data: newRequest,
+      };
     } catch (error) {
       console.log(error);
     }
@@ -327,6 +408,38 @@ export class UserService {
         .limit(limit) // Limit the number of records returned
         .exec(),
       this.notificationRepository.countDocuments({ user: userObj?._id }), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
+  }
+
+  async findReferrals(page: number, limit: number, email_address: string) {
+    // Get user data first
+    const userObj = await this.userRepository
+      .findOne({ email_address: email_address })
+      .lean()
+      .exec();
+
+    if (!userObj) {
+      throw new HttpException('User record not found', HttpStatus.NOT_FOUND);
+    }
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.referralsRepository
+        .find({
+          referrer: userObj?._id,
+        })
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .exec(),
+      this.referralsRepository.countDocuments({ referrer: userObj?._id }), // Count total documents for calculating total pages
     ]);
 
     return {

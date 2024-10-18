@@ -55,6 +55,9 @@ export class User {
   @Prop()
   nin: string;
 
+  @Prop({ unique: true, required: true })
+  referral_code: string;
+
   @Prop()
   dob: Date;
 

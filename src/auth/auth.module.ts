@@ -24,6 +24,7 @@ import { Requests, RequestsSchema } from 'src/schemas/requests.schema';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { OtpService } from 'src/otp/otp.service';
 import { OTP, OTPSchema } from 'src/schemas/otp.schema';
+import { Referral, ReferralSchema } from 'src/schemas/referral.schema';
 // import { MailService } from 'src/mail/mail.service';
 // import { Otp } from 'src/typeorm/entities/otp';
 // import { OtpService } from 'src/otp/otp.service';
@@ -43,6 +44,7 @@ import { OTP, OTPSchema } from 'src/schemas/otp.schema';
       { name: Notification.name, schema: NotificationSchema },
       { name: Requests.name, schema: RequestsSchema },
       { name: OTP.name, schema: OTPSchema },
+      { name: Referral.name, schema: ReferralSchema },
     ]),
     PassportModule,
     JwtModule.register({

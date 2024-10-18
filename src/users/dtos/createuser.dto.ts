@@ -40,6 +40,10 @@ export class CreateUserDTO {
   @IsString()
   phone_number: string;
 
+  @IsNotEmpty()
+  @IsString()
+  dial_code: string;
+
   @IsOptional()
   @IsString()
   @IsDateString()
@@ -64,6 +68,10 @@ export class CreateUserDTO {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @IsOptional()
+  @IsString()
+  referral_code?: string;
 
   @IsOptional()
   @IsBoolean()

@@ -159,6 +159,18 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('referrals')
+  async userReferrals(
+    @Req() req: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 25,
+  ) {
+    console.log('ENTERED THIS PART ::: ');
+
+    return await this.userService.findReferrals(page, limit, req.user?.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(':id/account/delete')
   @UsePipes(new ValidationPipe())
   async requestSoftDeleteAcc(
