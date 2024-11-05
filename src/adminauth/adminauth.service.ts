@@ -115,16 +115,15 @@ export class AdminAuthService {
       ),
     });
 
-
-      if (emailSent) {
-        return {
-          message: 'Account credentials sent to email successfully',
-        };
-      } else {
-        return {
-          message: 'Failed to send account credentials to email',
-        };
-      }
+    if (emailSent) {
+      return {
+        message: 'Account credentials sent to email successfully',
+      };
+    } else {
+      return {
+        message: 'Failed to send account credentials to email',
+      };
+    }
   }
 
   async sendOTP(email_address: string) {

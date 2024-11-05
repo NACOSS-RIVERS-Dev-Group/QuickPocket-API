@@ -33,7 +33,7 @@ export class AdminAuthController {
         }));
 
         // Extract the first error message from the validation errors
-        const firstErrorField = validationErrors[0].field;
+        // const firstErrorField = validationErrors[0].field;
         const firstErrorMessage = validationErrors[0].errors[0];
 
         return new BadRequestException({
@@ -58,7 +58,7 @@ export class AdminAuthController {
         }));
 
         // Extract the first error message from the validation errors
-        const firstErrorField = validationErrors[0].field;
+        // const firstErrorField = validationErrors[0].field;
         const firstErrorMessage = validationErrors[0].errors[0];
 
         return new BadRequestException({
