@@ -14,16 +14,8 @@ async function bootstrap() {
   //   // maxAge: 5,
   // };
 
+  app.enableCors();
   app.setGlobalPrefix('api/v1');
-  app.enableCors({
-    origin: 'http://localhost:3035/', // Specify the origin of your frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'], // Specify the allowed HTTP methods
-    // allowedHeaders: [
-    //   'Content-Type',
-    //   'Authorization',
-    //   'Access-Control-Allow-Origin',
-    // ], // Specify the allowed headers
-  });
 
   await app.listen(6000);
 }
