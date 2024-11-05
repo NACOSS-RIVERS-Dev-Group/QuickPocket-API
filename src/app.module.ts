@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -21,6 +21,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { Admin, AdminSchema } from './schemas/admin.schema';
 import { JwtService } from '@nestjs/jwt';
 import { OTP, OTPSchema } from './schemas/otp.schema';
+import { AppMiddleware } from './app.middleware';
 // import { AdminAuthService } from './adminauth/adminauth.service';
 // import { AdminsService } from './admins/admins.service';
 // import { Admin } from './schemas/admin.schema';
@@ -56,7 +57,6 @@ import { OTP, OTPSchema } from './schemas/otp.schema';
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OTPSchema },
     ]),
-    
   ],
   controllers: [AppController, AdminAuthController],
   providers: [
@@ -73,7 +73,12 @@ import { OTP, OTPSchema } from './schemas/otp.schema';
       provide: 'OTP_SERVICE',
       useClass: OtpService,
     },
-    JwtService
+    JwtService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply the AddHeaderMiddleware to routes starting with '/api/v1'
+    consumer.apply(AppMiddleware).forRoutes('/api/v1*');
+  }
+}
