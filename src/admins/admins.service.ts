@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Admin } from 'src/schemas/admin.schema';
-import { User } from 'src/schemas/user.schema';
 import { CreateAdminDTO } from './dtos/createadmin.dto';
 import { encodePassword } from 'src/utils/bcrypt';
 import { Activities } from 'src/schemas/activities.schema';
@@ -37,7 +36,6 @@ export class AdminsService {
   }
 
   async createAdmin(createAdmin: CreateAdminDTO): Promise<any> {
-
     // Check if email or password is used
     const exists = await this.adminRepository.findOne({
       email_address: createAdmin.email_address,
@@ -100,7 +98,7 @@ export class AdminsService {
   async findAdminByUsername(email_address: string): Promise<any> {
     const foundAdmin = await this.adminRepository
       .findOne({
-        email_address: email_address
+        email_address: email_address,
       })
       .lean()
       .exec();
@@ -109,7 +107,7 @@ export class AdminsService {
   }
 
   findAdminById(id: any): Promise<Admin> {
-    return this.adminRepository.findById(id);
+    return this.adminRepository.findById(id).lean().exec();
   }
 
   async updateAdmin(email_address: string, payload: any) {
@@ -123,7 +121,8 @@ export class AdminsService {
       email_address: email_address,
     });
 
-    if (!user) throw new HttpException('No record found.', HttpStatus.NOT_FOUND);
+    if (!user)
+      throw new HttpException('No record found.', HttpStatus.NOT_FOUND);
 
     await this.adminRepository.updateOne(
       { email_address: email_address },
@@ -156,6 +155,4 @@ export class AdminsService {
       user: data,
     };
   }
-
-
 }

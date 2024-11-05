@@ -249,7 +249,7 @@ export class AdminAuthService {
     const adminDB = await this.adminService.findAdminByUsername(
       loginAdminDTO?.email_address,
     );
-    console.log(adminDB);
+    console.log('ADMI ::: ', adminDB);
 
     if (!adminDB) {
       response.status(404).send({
@@ -264,10 +264,17 @@ export class AdminAuthService {
       bcrypt.compareSync(loginAdminDTO.password, adminDB?.password)
     ) {
       // update last_login here
-      await this.adminService.updateAdmin(adminDB?.email_address, {
-        next_login: new Date(),
-        last_login: adminDB?.next_login ?? new Date(),
-      });
+      await this.adminRepository.updateOne(
+        { email_address: adminDB?.email_address },
+        {
+          next_login: new Date(),
+          last_login: adminDB?.next_login ?? new Date(),
+        },
+      );
+      // await this.adminService.updateAdmin(adminDB?.email_address, {
+      //   next_login: new Date(),
+      //   last_login: adminDB?.next_login ?? new Date(),
+      // });
 
       await new this.activitiesRepository({
         status: 'success',
@@ -286,8 +293,10 @@ export class AdminAuthService {
         username: adminDB?.first_name,
       };
 
+      const token = await this.jwtService.signAsync(payload);
+
       return response.status(200).send({
-        accessToken: await this.jwtService.signAsync(payload),
+        accessToken: token,
         message: 'Logged in successfully',
         user: usr,
         status: 'success',

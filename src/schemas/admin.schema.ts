@@ -4,7 +4,27 @@ import { AdminRoles } from 'src/admins/dtos/createadmin.dto';
 
 export type AdminDocument = HydratedDocument<Admin>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true, // Include virtual fields
+    versionKey: false, // Disable __v field
+    transform(doc, ret) {
+      ret.id = ret._id; // You can optionally add the id field
+      delete ret._id; // Remove the _id field if needed
+      delete ret.password; // Remove sensitive data like password
+    },
+  },
+  toObject: {
+    virtuals: true, // Include virtual fields
+    versionKey: false, // Disable __v field
+    transform(doc, ret) {
+      ret.id = ret._id; // You can optionally add the id field
+      delete ret._id; // Remove the _id field if needed
+      delete ret.password; // Remove sensitive data like password
+    },
+  },
+})
 export class Admin {
   @Prop()
   first_name: string;

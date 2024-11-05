@@ -5,9 +5,13 @@ import { Admin, AdminSchema } from 'src/schemas/admin.schema';
 import { OTP, OTPSchema } from 'src/schemas/otp.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from 'src/schemas/user.schema';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { AdminsService } from 'src/admins/admins.service';
 import { OtpService } from 'src/otp/otp.service';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './utils/local_strategy';
+import { JwtStrategy } from './utils/jwt_strategy';
+import { AdminAuthController } from './adminauth.controller';
 
 @Module({
   imports: [
@@ -17,7 +21,13 @@ import { OtpService } from 'src/otp/otp.service';
       { name: OTP.name, schema: OTPSchema },
       { name: Activities.name, schema: ActivitiesSchema },
     ]),
+    PassportModule,
+    JwtModule.register({
+      secret: 'abc123JakasMan123@09nmdhyuDiloe((30(())',
+      signOptions: { expiresIn: '1h' },
+    }),
   ],
+  controllers: [AdminAuthController],
   providers: [
     {
       provide: 'ADMIN_SERVICE',
@@ -31,7 +41,8 @@ import { OtpService } from 'src/otp/otp.service';
       provide: 'OTP_SERVICE',
       useClass: OtpService,
     },
-    JwtService
-  ]
+    LocalStrategy,
+    JwtStrategy,
+  ],
 })
 export class AdminAuthModule {}

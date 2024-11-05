@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Body,
@@ -13,9 +14,9 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AdminAuthService } from './adminauth.service';
-import { LoginUserDTO } from 'src/users/dtos/loginuser.dto';
 import { CreateAdminDTO } from 'src/admins/dtos/createadmin.dto';
 import { ValidationError } from 'class-validator';
+import { LoginAdminDTO } from './dto/login.dto';
 
 @Controller('admin/auth')
 export class AdminAuthController {
@@ -44,8 +45,8 @@ export class AdminAuthController {
       },
     }),
   )
-  async login(@Body() loginUserDto: LoginUserDTO, @Res() res: Response) {
-    return await this.adminAuthService.validateLogin(loginUserDto, res);
+  async login(@Body() LoginAdminDTO: LoginAdminDTO, @Res() res: Response) {
+    return await this.adminAuthService.validateLogin(LoginAdminDTO, res);
   }
 
   @Post('signup')

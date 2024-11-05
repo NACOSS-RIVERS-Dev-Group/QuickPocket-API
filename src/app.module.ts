@@ -11,7 +11,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 // import { ConfigurableModu } from '@nestjs/common'; "@nestjs/config"
 import { OtpModule } from './otp/otp.module';
 import { AdminsModule } from './admins/admins.module';
-import { AdminAuthController } from './adminauth/adminauth.controller';
+// import { AdminAuthController } from './adminauth/adminauth.controller';
 import { AdminAuthModule } from './adminauth/adminauth.module';
 import { AdminAuthService } from './adminauth/adminauth.service';
 import { AdminsService } from './admins/admins.service';
@@ -19,9 +19,10 @@ import { OtpService } from './otp/otp.service';
 import { Activities, ActivitiesSchema } from './schemas/activities.schema';
 import { User, UserSchema } from './schemas/user.schema';
 import { Admin, AdminSchema } from './schemas/admin.schema';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { OTP, OTPSchema } from './schemas/otp.schema';
 import { AppMiddleware } from './app.middleware';
+import { PassportModule } from '@nestjs/passport';
 // import { AdminAuthService } from './adminauth/adminauth.service';
 // import { AdminsService } from './admins/admins.service';
 // import { Admin } from './schemas/admin.schema';
@@ -32,6 +33,11 @@ import { AppMiddleware } from './app.middleware';
       'mongodb+srv://appquickpocket:nilZF8z0rIEEh7Ad@cluster0.qzppm.mongodb.net/quickpocket',
       {},
     ),
+    PassportModule,
+    JwtModule.register({
+      secret: 'abc123JakasMan123@09nmdhyuDiloe((30(())',
+      signOptions: { expiresIn: '1h' },
+    }),
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -58,7 +64,7 @@ import { AppMiddleware } from './app.middleware';
       { name: OTP.name, schema: OTPSchema },
     ]),
   ],
-  controllers: [AppController, AdminAuthController],
+  controllers: [AppController],
   providers: [
     AppService,
     {

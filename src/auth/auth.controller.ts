@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Body,
@@ -7,6 +8,7 @@ import {
   Post,
   Put,
   Req,
+  Res,
   // UseGuards,
   UsePipes,
   ValidationError,
@@ -14,14 +16,20 @@ import {
   // UseGuards,
 } from '@nestjs/common';
 // import { LocalAuthGuard } from './guards/local_guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from 'src/users/dtos/createuser.dto';
 import { LoginUserDTO } from 'src/users/dtos/loginuser.dto';
+import { AdminAuthService } from 'src/adminauth/adminauth.service';
+import { CreateAdminDTO } from 'src/admins/dtos/createadmin.dto';
+import { LoginAdminDTO } from 'src/adminauth/dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject('AUTH_SERVICE') private authService: AuthService) {}
+  constructor(
+    @Inject('AUTH_SERVICE') private authService: AuthService,
+    @Inject('ADMIN_AUTH_SERVICE') private adminAuthService: AdminAuthService,
+  ) {}
 
   @Post('login')
   @UsePipes(
@@ -126,5 +134,103 @@ export class AuthController {
     console.log('Inside AuthController status method');
     console.log(req.user);
     return req.user;
+  }
+
+  // ADMIN AUTHENTICATION PART HERE
+  // ADMIN AUTHENTICATION PART HERE
+  // ADMIN AUTHENTICATION PART HERE
+  // ADMIN AUTHENTICATION PART HERE
+
+  @Post('admin/login')
+  @UsePipes(
+    new ValidationPipe({
+      exceptionFactory: (errors: ValidationError[]) => {
+        const validationErrors = errors.map((error) => ({
+          field: error.property,
+          errors: Object.values(error.constraints || {}),
+        }));
+
+        // Extract the first error message from the validation errors
+        // const firstErrorField = validationErrors[0].field;
+        const firstErrorMessage = validationErrors[0].errors[0];
+
+        return new BadRequestException({
+          statusCode: 400,
+          message: `${firstErrorMessage}`,
+          errors: validationErrors,
+        });
+      },
+    }),
+  )
+  async adminLogin(@Body() LoginAdminDTO: LoginAdminDTO, @Res() res: Response) {
+    return await this.adminAuthService.validateLogin(LoginAdminDTO, res);
+  }
+
+  @Post('admin/signup')
+  @UsePipes(
+    new ValidationPipe({
+      exceptionFactory: (errors: ValidationError[]) => {
+        const validationErrors = errors.map((error) => ({
+          field: error.property,
+          errors: Object.values(error.constraints || {}),
+        }));
+
+        // Extract the first error message from the validation errors
+        // const firstErrorField = validationErrors[0].field;
+        const firstErrorMessage = validationErrors[0].errors[0];
+
+        return new BadRequestException({
+          statusCode: 400,
+          message: `${firstErrorMessage}`,
+          errors: validationErrors,
+        });
+      },
+    }),
+  )
+  async adminSignup(@Body() createAdminDto: CreateAdminDTO) {
+    console.log('REQUEST :::', createAdminDto);
+    const result =
+      await this.adminAuthService.validateCreateAdmin(createAdminDto);
+    return result;
+  }
+
+  @Post('admin/resend-otp')
+  async adminRresendOtp(@Req() req: Request) {
+    console.log('RESEND_OTP REQ :: ', req.body);
+    const { email_address } = req.body;
+    const result = await this.adminAuthService.sendOTP(email_address);
+    return result;
+  }
+
+  @Post('admin/verify')
+  async adminVerifyAccount(@Req() req: Request) {
+    console.log('REQUEST USER ::: ', req.user);
+    const { code, email_address } = req.body;
+    const verifier = await this.adminAuthService.validateVerifyOTP({
+      code: code,
+      email_address: email_address,
+    });
+
+    return verifier;
+  }
+
+  @Post('admin/send-password-reset')
+  async adminSendPasswordEmail(@Req() req: Request) {
+    // console.log('RESEND_OTP REQ :: ', req.body);
+    const { email_address } = req.body;
+    const result =
+      await this.adminAuthService.sendPasswordResetEmail(email_address);
+    return result;
+  }
+
+  @Put('admin/reset-password')
+  async adminResetPassword(@Req() req: Request) {
+    const { new_password, confirm_password, email_address } = req.body;
+    const result = await this.adminAuthService.resetPassword(
+      new_password,
+      confirm_password,
+      email_address,
+    );
+    return result;
   }
 }

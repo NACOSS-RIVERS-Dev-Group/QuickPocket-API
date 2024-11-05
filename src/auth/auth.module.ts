@@ -25,6 +25,10 @@ import { User, UserSchema } from 'src/schemas/user.schema';
 import { OtpService } from 'src/otp/otp.service';
 import { OTP, OTPSchema } from 'src/schemas/otp.schema';
 import { Referral, ReferralSchema } from 'src/schemas/referral.schema';
+import { AdminAuthService } from 'src/adminauth/adminauth.service';
+import { AdminsService } from 'src/admins/admins.service';
+import { Activities, ActivitiesSchema } from 'src/schemas/activities.schema';
+import { Admin, AdminSchema } from 'src/schemas/admin.schema';
 // import { MailService } from 'src/mail/mail.service';
 // import { Otp } from 'src/typeorm/entities/otp';
 // import { OtpService } from 'src/otp/otp.service';
@@ -39,12 +43,14 @@ import { Referral, ReferralSchema } from 'src/schemas/referral.schema';
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: Admin.name, schema: AdminSchema },
       { name: NextOfKin.name, schema: NextOfKinSchema },
       { name: Appointment.name, schema: AppointmentSchema },
       { name: Notification.name, schema: NotificationSchema },
       { name: Requests.name, schema: RequestsSchema },
       { name: OTP.name, schema: OTPSchema },
       { name: Referral.name, schema: ReferralSchema },
+      { name: Activities.name, schema: ActivitiesSchema },
     ]),
     PassportModule,
     JwtModule.register({
@@ -62,10 +68,14 @@ import { Referral, ReferralSchema } from 'src/schemas/referral.schema';
       provide: 'USER_SERVICE',
       useClass: UserService,
     },
-    // {
-    //   provide: 'MAIL_SERVICE',
-    //   useClass: MailService,
-    // },
+    {
+      provide: 'ADMIN_AUTH_SERVICE',
+      useClass: AdminAuthService,
+    },
+    {
+      provide: 'ADMIN_SERVICE',
+      useClass: AdminsService,
+    },
     {
       provide: 'OTP_SERVICE',
       useClass: OtpService,
