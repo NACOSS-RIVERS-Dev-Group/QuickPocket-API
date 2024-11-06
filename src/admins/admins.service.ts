@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -5,6 +6,7 @@ import { Admin } from 'src/schemas/admin.schema';
 import { CreateAdminDTO } from './dtos/createadmin.dto';
 import { encodePassword } from 'src/utils/bcrypt';
 import { Activities } from 'src/schemas/activities.schema';
+import { Appointment } from 'src/schemas/appointments.schema';
 
 @Injectable()
 export class AdminsService {
@@ -12,6 +14,8 @@ export class AdminsService {
     @InjectModel(Admin.name) private adminRepository: Model<Admin>,
     @InjectModel(Activities.name)
     private activitiesRepository: Model<Activities>,
+    @InjectModel(Appointment.name)
+    private appointmentRepository: Model<Appointment>,
   ) {}
 
   async findAdmins(page: number, limit: number) {
@@ -154,5 +158,37 @@ export class AdminsService {
       message: 'Profile updated successfully',
       user: data,
     };
+  }
+
+  async findBookings(page: number, limit: number) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.appointmentRepository
+        .find({})
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .exec(),
+      this.appointmentRepository.countDocuments(), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
+  }
+
+  async findCurrentAdmin(email_address: string) {
+    const admin = await this.adminRepository
+      .findOne({ email_address: email_address })
+      .lean()
+      .exec();
+
+    const { password: ingnore, ...rest } = admin;
+
+    return rest;
   }
 }

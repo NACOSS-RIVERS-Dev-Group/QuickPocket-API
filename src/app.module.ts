@@ -23,6 +23,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { OTP, OTPSchema } from './schemas/otp.schema';
 import { AppMiddleware } from './app.middleware';
 import { PassportModule } from '@nestjs/passport';
+import { Appointment, AppointmentSchema } from './schemas/appointments.schema';
 // import { AdminAuthService } from './adminauth/adminauth.service';
 // import { AdminsService } from './admins/admins.service';
 // import { Admin } from './schemas/admin.schema';
@@ -62,6 +63,7 @@ import { PassportModule } from '@nestjs/passport';
       { name: Admin.name, schema: AdminSchema },
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OTPSchema },
+      { name: Appointment.name, schema: AppointmentSchema },
     ]),
   ],
   controllers: [AppController],

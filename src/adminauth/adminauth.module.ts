@@ -12,6 +12,10 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './utils/local_strategy';
 import { JwtStrategy } from './utils/jwt_strategy';
 import { AdminAuthController } from './adminauth.controller';
+import {
+  Appointment,
+  AppointmentSchema,
+} from 'src/schemas/appointments.schema';
 
 @Module({
   imports: [
@@ -20,6 +24,7 @@ import { AdminAuthController } from './adminauth.controller';
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OTPSchema },
       { name: Activities.name, schema: ActivitiesSchema },
+      { name: Appointment.name, schema: AppointmentSchema },
     ]),
     PassportModule,
     JwtModule.register({
