@@ -166,6 +166,10 @@ export class AdminsService {
     const [data, total] = await Promise.all([
       this.appointmentRepository
         .find({})
+        .populate(
+          'user',
+          'first_name last_name email_address phone_number photoUrl',
+        )
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .exec(),
@@ -190,5 +194,32 @@ export class AdminsService {
     const { password: ingnore, ...rest } = admin;
 
     return rest;
+  }
+
+  async findBookingsByCategory(page: number, limit: number, category: string) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.appointmentRepository
+        .find({
+          category: category,
+        })
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .populate(
+          'user',
+          'first_name last_name email_address phone_number photoUrl',
+        )
+        .exec(),
+      this.appointmentRepository.countDocuments({ category: category }), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
   }
 }

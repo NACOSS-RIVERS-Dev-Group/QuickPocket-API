@@ -31,9 +31,12 @@ export class NotificationService {
   }
 
   async findNotificationByUser(userId: string): Promise<Notification> {
-    const foundNotification = await this.notificationRepository.findOne({
-      user: userId,
-    });
+    const foundNotification = await this.notificationRepository
+      .findOne({
+        user: userId,
+      })
+      .lean()
+      .exec();
 
     return foundNotification;
   }

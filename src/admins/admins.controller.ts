@@ -8,11 +8,27 @@ export class AdminsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('bookings/all')
-  async allUsers(
+  async allBookings(
     @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
     @Query('limit') limit: number = 25,
   ) {
     return await this.adminService.findBookings(page, limit);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('bookings/category/all')
+  async categoryBookings(
+    @Query('category') category: string,
+    @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
+    @Query('limit') limit: number = 25,
+  ) {
+    console.log('JKD KJHSD ', category);
+
+    return await this.adminService.findBookingsByCategory(
+      page,
+      limit,
+      category,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
