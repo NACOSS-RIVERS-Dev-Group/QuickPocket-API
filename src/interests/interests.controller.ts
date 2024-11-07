@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   UseGuards,
   UsePipes,
@@ -46,7 +47,11 @@ export class InterestsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('all')
-  async allUsers() {
-    return await this.service.allInterests();
+  async all(
+    @Req() req: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 25,
+  ) {
+    return this.service.allInterests(page, limit);
   }
 }

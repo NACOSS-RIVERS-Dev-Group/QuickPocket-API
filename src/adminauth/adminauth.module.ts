@@ -16,6 +16,8 @@ import {
   Appointment,
   AppointmentSchema,
 } from 'src/schemas/appointments.schema';
+import { Banner, BannerSchema } from 'src/schemas/banner.schema';
+import { Social, SocialSchema } from 'src/schemas/socials.schema';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import {
       { name: OTP.name, schema: OTPSchema },
       { name: Activities.name, schema: ActivitiesSchema },
       { name: Appointment.name, schema: AppointmentSchema },
+      { name: Social.name, schema: SocialSchema },
+      { name: Banner.name, schema: BannerSchema },
     ]),
     PassportModule,
     JwtModule.register({

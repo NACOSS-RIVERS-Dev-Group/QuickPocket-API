@@ -61,11 +61,29 @@ export class InterestsService {
     }
   }
 
-  async allInterests() {
-    try {
-      return await this.interestRepository.find();
-    } catch (error) {
-      console.log(error);
-    }
+  async allInterests(page: number, limit: number) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.interestRepository
+        .find({})
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .populate(
+          'user',
+          'first_name last_name email_address phone_number photoUrl',
+        )
+        .populate('marketplace', 'title amount details images')
+        .exec(),
+      this.interestRepository.countDocuments(), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
   }
 }

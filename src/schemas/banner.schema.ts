@@ -17,8 +17,17 @@ export class Banner {
   @Prop()
   amount: number;
 
-  @Prop({ enum: ['active', 'pending', 'completed', 'canceled'] })
+  @Prop({
+    enum: ['active', 'pending', 'completed', 'canceled'],
+    default: 'pending',
+  })
   status: string;
+
+  @Prop({
+    enum: ['image', 'video'],
+    default: 'image',
+  })
+  type: string;
 
   @Prop()
   startDate: Date;

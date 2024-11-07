@@ -7,6 +7,10 @@ import { CreateAdminDTO } from './dtos/createadmin.dto';
 import { encodePassword } from 'src/utils/bcrypt';
 import { Activities } from 'src/schemas/activities.schema';
 import { Appointment } from 'src/schemas/appointments.schema';
+import { AddSocialDTO } from './dtos/addsocial.dto';
+import { Social } from 'src/schemas/socials.schema';
+import { AddBannerDTO } from './dtos/addbanner.dto';
+import { Banner } from 'src/schemas/banner.schema';
 
 @Injectable()
 export class AdminsService {
@@ -16,6 +20,10 @@ export class AdminsService {
     private activitiesRepository: Model<Activities>,
     @InjectModel(Appointment.name)
     private appointmentRepository: Model<Appointment>,
+    @InjectModel(Social.name)
+    private socialRepository: Model<Social>,
+    @InjectModel(Banner.name)
+    private bannerRepository: Model<Banner>,
   ) {}
 
   async findAdmins(page: number, limit: number) {
@@ -221,5 +229,79 @@ export class AdminsService {
       totalItems: total,
       perPage: limit,
     };
+  }
+
+  async saveSocial({ logo, name, url }: AddSocialDTO, email_address: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      await new this.socialRepository({
+        logo: logo,
+        name: name,
+        url: url,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }).save();
+
+      await new this.activitiesRepository({
+        category: 'social',
+        title: `${adm?.first_name} ${adm?.last_name} added a new social platform on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Social platform added successfully.',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async saveBannerAd(
+    { amount, endDate, preview, startDate, title, type, url }: AddBannerDTO,
+    email_address: string,
+  ) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      await new this.bannerRepository({
+        amount: amount,
+        endDate: endDate,
+        preview: preview,
+        startDate: startDate,
+        status: 'pending',
+        title: title,
+        type: type,
+        url: url,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }).save();
+
+      await new this.activitiesRepository({
+        category: 'banner',
+        title: `${adm?.first_name} ${adm?.last_name} added a new banner advert on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Banner advert added successfully. Awaiting approval',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

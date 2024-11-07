@@ -8,6 +8,8 @@ import {
   Appointment,
   AppointmentSchema,
 } from 'src/schemas/appointments.schema';
+import { Social, SocialSchema } from 'src/schemas/socials.schema';
+import { Banner, BannerSchema } from 'src/schemas/banner.schema';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import {
       { name: Admin.name, schema: AdminSchema },
       { name: Activities.name, schema: ActivitiesSchema },
       { name: Appointment.name, schema: AppointmentSchema },
+      { name: Social.name, schema: SocialSchema },
+      { name: Banner.name, schema: BannerSchema },
     ]),
   ],
   providers: [AdminsService],

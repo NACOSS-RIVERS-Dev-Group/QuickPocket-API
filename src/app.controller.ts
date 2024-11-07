@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Put } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -8,5 +8,10 @@ export class AppController {
   @Get()
   getWelcomeMessage() {
     return { message: 'Welcome to Quick Pocket API' };
+  }
+
+  @Put('image/upload')
+  uploadSingleImage(@Body() body: any) {
+    return this.appService.imageUploader(body?.image);
   }
 }

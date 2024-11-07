@@ -24,6 +24,8 @@ import { OTP, OTPSchema } from './schemas/otp.schema';
 import { AppMiddleware } from './app.middleware';
 import { PassportModule } from '@nestjs/passport';
 import { Appointment, AppointmentSchema } from './schemas/appointments.schema';
+import { Social, SocialSchema } from './schemas/socials.schema';
+import { Banner, BannerSchema } from './schemas/banner.schema';
 // import { AdminAuthService } from './adminauth/adminauth.service';
 // import { AdminsService } from './admins/admins.service';
 // import { Admin } from './schemas/admin.schema';
@@ -64,6 +66,8 @@ import { Appointment, AppointmentSchema } from './schemas/appointments.schema';
       { name: User.name, schema: UserSchema },
       { name: OTP.name, schema: OTPSchema },
       { name: Appointment.name, schema: AppointmentSchema },
+      { name: Social.name, schema: SocialSchema },
+      { name: Banner.name, schema: BannerSchema },
     ]),
   ],
   controllers: [AppController],

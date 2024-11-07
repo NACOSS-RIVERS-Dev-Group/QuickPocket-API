@@ -18,16 +18,16 @@ export class MarketplaceService {
     images,
     title,
   }: AddMarketplaceItem) {
-    const newMarketplace = new this.marketplaceRepository({
+    const newMarketplace = await new this.marketplaceRepository({
       amount: amount,
       details: detail,
       images,
       title,
       created_at: new Date(),
       updated_at: new Date(),
-    });
+    }).save();
 
-    return newMarketplace.save();
+    return newMarketplace;
   }
 
   async updateMarketplaceItem(payload: AddMarketplaceItem, id: any) {
@@ -36,7 +36,7 @@ export class MarketplaceService {
     }
 
     const item = await this.marketplaceRepository.findOne({
-      email_address: id,
+      id: id,
     });
     if (!item)
       throw new HttpException('No record found.', HttpStatus.NOT_FOUND);

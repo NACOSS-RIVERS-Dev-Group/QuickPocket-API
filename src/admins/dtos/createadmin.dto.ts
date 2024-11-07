@@ -5,10 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsStrongPassword,
 } from 'class-validator';
-import * as ValidatorJS from 'validator';
-
 
 export enum AdminRoles {
   MANAGER = 'manager',
@@ -28,43 +25,43 @@ export enum AdminType {
 }
 
 export class CreateAdminDTO {
-  @IsNotEmpty({ message: "First name is required" })
+  @IsNotEmpty({ message: 'First name is required' })
   @IsString()
-  @IsAlpha("en-US", { message: "Only alphabets are allowed" })
+  @IsAlpha('en-US', { message: 'Only alphabets are allowed' })
   first_name: string;
 
-  @IsNotEmpty({ message: "Last name is required" })
+  @IsNotEmpty({ message: 'Last name is required' })
   @IsString()
-  @IsAlpha("en-US", { message: "Only alphabets are allowed" })
+  @IsAlpha('en-US', { message: 'Only alphabets are allowed' })
   last_name: string;
 
-  @IsNotEmpty({ message: "Email address is required" })
-  @IsEmail({}, { message: "Email address is invalid" })
+  @IsNotEmpty({ message: 'Email address is required' })
+  @IsEmail({}, { message: 'Email address is invalid' })
   email_address: string;
 
   @IsOptional()
   password: string;
 
-  @IsNotEmpty({ message: "Phone number is required" })
-  @IsString({ message: "Phone number must be a string" })
+  @IsNotEmpty({ message: 'Phone number is required' })
+  @IsString({ message: 'Phone number must be a string' })
   phone_number: string;
 
-  @IsNotEmpty({ message: "Admin role is required" })
-  @IsString({ message: "Admin role must be a string" })
+  @IsNotEmpty({ message: 'Admin role is required' })
+  @IsString({ message: 'Admin role must be a string' })
   @IsEnum(AdminRoles)
   role: AdminRoles;
 
-  @IsNotEmpty({ message: "Admin access right is required" })
+  @IsNotEmpty({ message: 'Admin access right is required' })
   @IsString()
   @IsEnum(AccessRights)
   access: AccessRights;
 
-  @IsNotEmpty({ message: "Admin type is required" })
+  @IsNotEmpty({ message: 'Admin type is required' })
   @IsString()
   @IsEnum(AdminType)
   type: AdminType;
 
-  @IsNotEmpty({ message: "Address is required" })
+  @IsNotEmpty({ message: 'Address is required' })
   @IsString()
   address: string;
 }

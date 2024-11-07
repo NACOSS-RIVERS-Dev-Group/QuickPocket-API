@@ -29,6 +29,8 @@ import { AdminAuthService } from 'src/adminauth/adminauth.service';
 import { AdminsService } from 'src/admins/admins.service';
 import { Activities, ActivitiesSchema } from 'src/schemas/activities.schema';
 import { Admin, AdminSchema } from 'src/schemas/admin.schema';
+import { Social, SocialSchema } from 'src/schemas/socials.schema';
+import { Banner, BannerSchema } from 'src/schemas/banner.schema';
 // import { MailService } from 'src/mail/mail.service';
 // import { Otp } from 'src/typeorm/entities/otp';
 // import { OtpService } from 'src/otp/otp.service';
@@ -51,6 +53,8 @@ import { Admin, AdminSchema } from 'src/schemas/admin.schema';
       { name: OTP.name, schema: OTPSchema },
       { name: Referral.name, schema: ReferralSchema },
       { name: Activities.name, schema: ActivitiesSchema },
+      { name: Social.name, schema: SocialSchema },
+      { name: Banner.name, schema: BannerSchema },
     ]),
     PassportModule,
     JwtModule.register({
