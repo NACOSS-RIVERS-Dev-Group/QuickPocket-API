@@ -3,7 +3,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Admin } from 'src/schemas/admin.schema';
-import { CreateAdminDTO } from './dtos/createadmin.dto';
+import {
+  AccessRights,
+  AdminRoles,
+  CreateAdminDTO,
+} from './dtos/createadmin.dto';
 import { encodePassword } from 'src/utils/bcrypt';
 import { Activities } from 'src/schemas/activities.schema';
 import { Appointment } from 'src/schemas/appointments.schema';
@@ -231,6 +235,92 @@ export class AdminsService {
     };
   }
 
+  async approveBooking(id: string, email_address: string) {
+    //First check admin and if they have the right privilege
+
+    const admin = await this.adminRepository
+      .findOne({ email_address })
+      .lean()
+      .exec();
+
+    if (!admin) {
+      throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+    }
+
+    if (
+      admin.role !== AdminRoles.MANAGER &&
+      admin.role !== AdminRoles.DEVELOPER &&
+      admin.access !== AccessRights.READ_WRITE
+    ) {
+      throw new HttpException(
+        'You do not have the right privilege.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const booking = await this.appointmentRepository
+      .findOne({ _id: id })
+      .lean()
+      .exec();
+
+    if (!booking) {
+      throw new HttpException('Booking not found.', HttpStatus.NOT_FOUND);
+    }
+
+    const updatedBooking = await this.appointmentRepository
+      .updateOne({ _id: booking?._id }, { status: 'booked' })
+      .lean()
+      .exec();
+
+    return {
+      message: 'Appointment approved successfully',
+      data: updatedBooking,
+    };
+  }
+
+  async declineBooking(id: string, email_address: string) {
+    //First check admin and if they have the right privilege
+
+    const admin = await this.adminRepository
+      .findOne({ email_address })
+      .lean()
+      .exec();
+
+    if (!admin) {
+      throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+    }
+
+    if (
+      admin.role !== AdminRoles.MANAGER &&
+      admin.role !== AdminRoles.DEVELOPER &&
+      admin.access !== AccessRights.READ_WRITE
+    ) {
+      throw new HttpException(
+        'You do not have the right privilege.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const booking = await this.appointmentRepository
+      .findOne({ _id: id })
+      .lean()
+      .exec();
+
+    if (!booking) {
+      throw new HttpException('Booking not found.', HttpStatus.NOT_FOUND);
+    }
+
+    const updatedBooking = await this.appointmentRepository
+      .updateOne({ _id: booking?._id }, { status: 'cancelled' })
+      .lean()
+      .exec();
+
+    return {
+      message: 'Appointment approved successfully',
+      data: updatedBooking,
+    };
+  }
+
   async saveSocial({ logo, name, url }: AddSocialDTO, email_address: string) {
     try {
       //First check if user exist and marketplace exists
@@ -239,6 +329,18 @@ export class AdminsService {
       });
       if (!adm) {
         throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       await new this.socialRepository({
@@ -303,5 +405,9 @@ export class AdminsService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async getSocials() {
+    return await this.socialRepository.find({}).lean().exec();
   }
 }

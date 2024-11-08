@@ -16,6 +16,8 @@ export class MarketPlace {
 
   @Prop([String])
   images: string[];
-}
 
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null; // Added soft delete field
+}
 export const MarketPlaceSchema = SchemaFactory.createForClass(MarketPlace);

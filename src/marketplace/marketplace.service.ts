@@ -54,7 +54,7 @@ export class MarketplaceService {
 
     const [data, total] = await Promise.all([
       this.marketplaceRepository
-        .find({})
+        .find({ deletedAt: null })
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .exec(),

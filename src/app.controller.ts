@@ -14,4 +14,9 @@ export class AppController {
   uploadSingleImage(@Body() body: any) {
     return this.appService.imageUploader(body?.image);
   }
+
+  @Put('images/upload')
+  uploadMultipleImages(@Body() body: any) {
+    return this.appService.imagesUploader(body?.images);
+  }
 }

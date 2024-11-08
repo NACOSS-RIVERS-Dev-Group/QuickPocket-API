@@ -59,10 +59,8 @@ export class MarketplaceController {
 
   @UseGuards(JwtAuthGuard)
   @Post('update')
-  async update(@Body() body: AddMarketplaceItem, @Req() req: Request) {
-    console.log('USER INFO ::: ', req.user);
-
-    // return this.service.updateMarketplaceItem(body, req?.user);
+  async update(@Body() body: AddMarketplaceItem, @Req() req: any) {
+    return this.service.updateMarketplaceItem(body, req?.user?.sub);
   }
 
   @UseGuards(JwtAuthGuard)

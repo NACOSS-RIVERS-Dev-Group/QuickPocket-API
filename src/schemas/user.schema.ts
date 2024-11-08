@@ -64,6 +64,9 @@ export class User {
   @Prop({ enum: ['male', 'female'], default: 'male' })
   gender: string;
 
+  @Prop({ enum: ['active', 'suspended', 'deleted'], default: 'active' })
+  status: string;
+
   @Prop()
   address: string;
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uploadImage } from './utils/image-upload';
+import { uploadImage, uploadMultipleImages } from './utils/image-upload';
 
 @Injectable()
 export class AppService {
@@ -9,5 +9,9 @@ export class AppService {
 
   imageUploader(image: any) {
     return uploadImage(image);
+  }
+
+  imagesUploader(images: any[]) {
+    return uploadMultipleImages(images);
   }
 }
