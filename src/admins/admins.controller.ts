@@ -85,4 +85,11 @@ export class AdminsController {
     console.log('CURRENT ADMIN', req.user);
     return await this.adminService.saveBannerAd(body, req?.user?.sub);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('banners/all')
+  async getBanners(@Req() req: any) {
+    console.log('CURRENT ADMIN', req.user);
+    return await this.adminService.getBanners();
+  }
 }

@@ -6,7 +6,7 @@ export type BannerDocument = HydratedDocument<Banner>;
 @Schema({ timestamps: true })
 export class Banner {
   @Prop()
-  title: string;
+  title?: string;
 
   @Prop()
   url: string;
@@ -15,11 +15,11 @@ export class Banner {
   preview: string;
 
   @Prop()
-  amount: number;
+  amount?: number;
 
   @Prop({
-    enum: ['active', 'pending', 'completed', 'canceled'],
-    default: 'pending',
+    enum: ['active', 'inactive'],
+    default: 'inactive',
   })
   status: string;
 
@@ -28,12 +28,6 @@ export class Banner {
     default: 'image',
   })
   type: string;
-
-  @Prop()
-  startDate: Date;
-
-  @Prop()
-  endDate: Date;
 }
 
 export const BannerSchema = SchemaFactory.createForClass(Banner);

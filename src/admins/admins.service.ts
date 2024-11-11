@@ -381,10 +381,8 @@ export class AdminsService {
 
       await new this.bannerRepository({
         amount: amount,
-        endDate: endDate,
         preview: preview,
-        startDate: startDate,
-        status: 'pending',
+        status: 'inactive',
         title: title,
         type: type,
         url: url,
@@ -409,5 +407,9 @@ export class AdminsService {
 
   async getSocials() {
     return await this.socialRepository.find({}).lean().exec();
+  }
+
+  async getBanners() {
+    return await this.bannerRepository.find({}).lean().exec();
   }
 }
