@@ -12,7 +12,7 @@ export class Settings {
   email_address: string;
 
   @Prop()
-  privacy_policy: string;
+  office_address: string;
 }
 
 export const SettingsSchema = SchemaFactory.createForClass(Settings);

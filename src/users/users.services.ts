@@ -50,7 +50,7 @@ export class UserService {
 
     const [data, total] = await Promise.all([
       this.userRepository
-        .find({})
+        .find({ status: { $ne: 'deleted' } })
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .exec(),

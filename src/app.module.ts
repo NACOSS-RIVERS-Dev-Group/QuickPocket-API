@@ -26,6 +26,7 @@ import { PassportModule } from '@nestjs/passport';
 import { Appointment, AppointmentSchema } from './schemas/appointments.schema';
 import { Social, SocialSchema } from './schemas/socials.schema';
 import { Banner, BannerSchema } from './schemas/banner.schema';
+import { Settings, SettingsSchema } from './schemas/settings.schema';
 // import { AdminAuthService } from './adminauth/adminauth.service';
 // import { AdminsService } from './admins/admins.service';
 // import { Admin } from './schemas/admin.schema';
@@ -68,6 +69,7 @@ import { Banner, BannerSchema } from './schemas/banner.schema';
       { name: Appointment.name, schema: AppointmentSchema },
       { name: Social.name, schema: SocialSchema },
       { name: Banner.name, schema: BannerSchema },
+      { name: Settings.name, schema: SettingsSchema },
     ]),
   ],
   controllers: [AppController],

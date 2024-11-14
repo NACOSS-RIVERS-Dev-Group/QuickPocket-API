@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Post,
   Put,
   Query,
@@ -12,10 +13,29 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt_guard';
 import { AdminsService } from './admins.service';
 import { AddSocialDTO } from './dtos/addsocial.dto';
 import { AddBannerDTO } from './dtos/addbanner.dto';
+import { AdminAuthService } from 'src/adminauth/adminauth.service';
+import { CreateAdminDTO } from './dtos/createadmin.dto';
 
 @Controller('admins')
 export class AdminsController {
-  constructor(private adminService: AdminsService) {}
+  constructor(
+    private adminService: AdminsService,
+    @Inject('ADMIN_AUTH_SERVICE') private authAdminService: AdminAuthService,
+  ) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('all')
+  async allAdmins(
+    @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
+    @Query('limit') limit: number = 25,
+  ) {
+    return await this.adminService.findAdmins(page, limit);
+  }
+
+  @Post('admin/create')
+  async createAdmin(@Body() body: CreateAdminDTO) {
+    return await this.authAdminService.validateCreateAdmin(body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('bookings/all')
@@ -91,5 +111,58 @@ export class AdminsController {
   async getBanners(@Req() req: any) {
     console.log('CURRENT ADMIN', req.user);
     return await this.adminService.getBanners();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('banners/:id/update')
+  async updateBanner(@Req() req: any) {
+    const bannerId = req.params?.id;
+    const currUsername = req.user?.sub;
+    return await this.adminService.updateBannerAd(
+      req.body,
+      currUsername,
+      bannerId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('banners/:id/delete')
+  async deleteBanner(@Req() req: any) {
+    const bannerId = req.params?.id;
+    const currUsername = req.user?.sub;
+    return await this.adminService.deleteBannerAd(currUsername, bannerId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('socials/:id/update')
+  async updateSocial(@Req() req: any) {
+    const socialId = req.params?.id;
+    const currUsername = req.user?.sub;
+    return await this.adminService.updateSocial(
+      req.body,
+      currUsername,
+      socialId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('socials/:id/delete')
+  async deletSocial(@Req() req: any) {
+    const socialId = req.params?.id;
+    const currUsername = req.user?.sub;
+    return await this.adminService.deleteSocial(currUsername, socialId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('settings/manage')
+  async manageSettings(@Req() req: any, @Body() body: any) {
+    const currUsername = req.user?.sub;
+    return await this.adminService.manageSettings(body, currUsername);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('settings/all')
+  async getSettings() {
+    return await this.adminService.findSettings();
   }
 }

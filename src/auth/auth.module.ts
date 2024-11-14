@@ -31,6 +31,7 @@ import { Activities, ActivitiesSchema } from 'src/schemas/activities.schema';
 import { Admin, AdminSchema } from 'src/schemas/admin.schema';
 import { Social, SocialSchema } from 'src/schemas/socials.schema';
 import { Banner, BannerSchema } from 'src/schemas/banner.schema';
+import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
 // import { MailService } from 'src/mail/mail.service';
 // import { Otp } from 'src/typeorm/entities/otp';
 // import { OtpService } from 'src/otp/otp.service';
@@ -55,6 +56,7 @@ import { Banner, BannerSchema } from 'src/schemas/banner.schema';
       { name: Activities.name, schema: ActivitiesSchema },
       { name: Social.name, schema: SocialSchema },
       { name: Banner.name, schema: BannerSchema },
+      { name: Settings.name, schema: SettingsSchema },
     ]),
     PassportModule,
     JwtModule.register({

@@ -34,6 +34,7 @@ import { AccountDeletionDTO } from './dtos/accountdeletion.dto';
 import { AddAppointmentDTO } from './dtos/addappointment.dto';
 import { UpdateUserDTO } from './dtos/updateuser.dto';
 import { AccountDeletionWebDTO } from './dtos/accountdeletion.web.dto';
+import { UpdateUser2DTO } from './dtos/updateuser2.dto';
 
 @Controller('users')
 export class UsersController {
@@ -74,7 +75,7 @@ export class UsersController {
       },
     }),
   )
-  updateUser(@Body() body: UpdateUserDTO, @Req() req: any) {
+  updateProfile(@Body() body: UpdateUserDTO, @Req() req: any) {
     console.log('ID :: ', req.user);
 
     if (!req?.user) {
@@ -84,6 +85,38 @@ export class UsersController {
       );
     }
     return this.userService.updateUser(req?.user?.sub, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('info/update')
+  @UsePipes(
+    new ValidationPipe({
+      exceptionFactory: (errors: ValidationError[]) => {
+        const validationErrors = errors.map((error) => ({
+          field: error.property,
+          errors: Object.values(error.constraints || {}),
+        }));
+
+        // Extract the first error message from the validation errors
+        const firstErrorField = validationErrors[0].field;
+        const firstErrorMessage = validationErrors[0].errors[0];
+
+        return new BadRequestException({
+          statusCode: 400,
+          message: `${firstErrorField}: ${firstErrorMessage}`,
+          errors: validationErrors,
+        });
+      },
+    }),
+  )
+  updateUser(@Body() body: UpdateUser2DTO, @Req() req: any) {
+    if (!req?.user) {
+      throw new HttpException(
+        'You are highly forbidden!!!',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return this.userService.updateUser(body?.email_address, body);
   }
 
   @UseGuards(JwtAuthGuard)

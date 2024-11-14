@@ -15,6 +15,7 @@ import { AddSocialDTO } from './dtos/addsocial.dto';
 import { Social } from 'src/schemas/socials.schema';
 import { AddBannerDTO } from './dtos/addbanner.dto';
 import { Banner } from 'src/schemas/banner.schema';
+import { Settings } from 'src/schemas/settings.schema';
 
 @Injectable()
 export class AdminsService {
@@ -28,6 +29,8 @@ export class AdminsService {
     private socialRepository: Model<Social>,
     @InjectModel(Banner.name)
     private bannerRepository: Model<Banner>,
+    @InjectModel(Settings.name)
+    private settingsRepository: Model<Settings>,
   ) {}
 
   async findAdmins(page: number, limit: number) {
@@ -405,11 +408,255 @@ export class AdminsService {
     }
   }
 
+  async updateBannerAd(
+    { status, type, preview, title, url, amount }: any,
+    email_address: string,
+    id: string,
+  ) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundBanner = await this.bannerRepository.findOne({
+        _id: id,
+      });
+      if (!foundBanner) {
+        throw new HttpException('Banner not found.', HttpStatus.NOT_FOUND);
+      }
+
+      const updatedBanner = await this.bannerRepository
+        .updateOne(
+          { _id: id },
+          {
+            status: status,
+            type: type,
+            preview: preview,
+            title: title,
+            amount: amount,
+            url: url,
+          },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'banner',
+        title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundBanner?.title}) on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Banner advert update successfully',
+        data: updatedBanner,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteBannerAd(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundBanner = await this.bannerRepository.findOne({
+        _id: id,
+      });
+      if (!foundBanner) {
+        throw new HttpException('Banner not found.', HttpStatus.NOT_FOUND);
+      }
+
+      await new this.activitiesRepository({
+        category: 'banner',
+        title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundBanner?.title}) on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      //       await this.userRepository.updateOne({ _id: userId }, { $set: { status: 'active' } }).exec();
+      // await this.bannerRepository.deleteOne({ _id: userId }).exec();
+
+      await this.bannerRepository.deleteOne({ _id: id });
+
+      return {
+        message: 'Banner advert deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateSocial(
+    { name, logo, url }: any,
+    email_address: string,
+    id: string,
+  ) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundSocial = await this.socialRepository.findOne({
+        id: id,
+      });
+      if (!foundSocial) {
+        throw new HttpException(
+          'Social record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const updatedSocial = await this.socialRepository
+        .updateOne(
+          { id: foundSocial?.id ?? foundSocial?._id ?? id },
+          {
+            name: name,
+            logo: logo,
+            url: url,
+          },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'social',
+        title: `${adm?.first_name} ${adm?.last_name} updated ${foundSocial?.name} account info on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Social account info update successfully',
+        data: updatedSocial,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteSocial(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundSocial = await this.socialRepository.findOne({
+        id: id,
+      });
+      if (!foundSocial) {
+        throw new HttpException(
+          'Social record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await new this.activitiesRepository({
+        category: 'social',
+        title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundSocial?.name}) on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      await this.socialRepository
+        .deleteOne({ _id: foundSocial?.id ?? foundSocial?._id ?? id })
+        .lean()
+        .exec();
+
+      return {
+        message: 'Social account deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async getSocials() {
     return await this.socialRepository.find({}).lean().exec();
   }
 
   async getBanners() {
     return await this.bannerRepository.find({}).lean().exec();
+  }
+
+  async manageSettings(
+    { email_address: appEmail, phone_number, office_address }: any,
+    email_address: string,
+  ) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundSettings = await this.settingsRepository.findOne({
+        email_address: email_address,
+      });
+      if (!foundSettings) {
+        // Create new
+        await new this.settingsRepository({
+          phone_number: phone_number,
+          email_address: appEmail,
+          office_address: office_address,
+          created_at: new Date(),
+          updated_at: new Date(),
+        }).save();
+
+        await new this.activitiesRepository({
+          category: 'settings',
+          title: `${adm?.first_name} ${adm?.last_name} initialized platform settings on ${Date.now().toLocaleString('en-US')}`,
+          user: adm?._id ?? adm?.id,
+        }).save();
+      } else {
+        // Update current
+        await this.settingsRepository
+          .updateOne(
+            { _id: foundSettings?.id ?? foundSettings?._id },
+            {
+              phone_number: phone_number,
+              email_address: appEmail,
+              office_address: office_address,
+            },
+          )
+          .lean()
+          .exec();
+
+        await new this.activitiesRepository({
+          category: 'settings',
+          title: `${adm?.first_name} ${adm?.last_name} update platform settings on ${Date.now().toLocaleString('en-US')}`,
+          user: adm?._id ?? adm?.id,
+        }).save();
+      }
+
+      return {
+        message: 'Operation completed successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async findSettings() {
+    return await this.settingsRepository.find({}).lean().exec();
   }
 }
