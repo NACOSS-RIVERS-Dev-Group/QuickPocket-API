@@ -38,6 +38,29 @@ export class AdminsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('admin/:id/suspend')
+  async suspendAdmin(@Req() req: any) {
+    console.log('Admiin :::: ', req?.params);
+
+    return await this.adminService.suspendAdmin(
+      req?.user?.sub,
+      req?.params?.id,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/:id/pardon')
+  async pardonAdmin(@Req() req: any) {
+    return await this.adminService.pardonAdmin(req?.user?.sub, req?.params?.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('admin/:id/delete')
+  async deleteAdmin(@Req() req: any) {
+    return await this.adminService.deleteAdmin(req?.user?.sub, req?.params?.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('bookings/all')
   async allBookings(
     @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
@@ -81,14 +104,12 @@ export class AdminsController {
   @UseGuards(JwtAuthGuard)
   @Get('current/profile')
   async profile(@Req() req: any) {
-    console.log('CURRENT ADMIN', req.user);
     return await this.adminService.findCurrentAdmin(req?.user?.sub);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('socials/add')
   async saveSocial(@Req() req: any, @Body() body: AddSocialDTO) {
-    console.log('CURRENT ADMIN', req.user);
     return await this.adminService.saveSocial(body, req?.user?.sub);
   }
 
@@ -102,7 +123,6 @@ export class AdminsController {
   @UseGuards(JwtAuthGuard)
   @Post('banners/add')
   async saveBanner(@Req() req: any, @Body() body: AddBannerDTO) {
-    console.log('CURRENT ADMIN', req.user);
     return await this.adminService.saveBannerAd(body, req?.user?.sub);
   }
 
@@ -164,5 +184,14 @@ export class AdminsController {
   @Get('settings/all')
   async getSettings() {
     return await this.adminService.findSettings();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('activities/all')
+  async allActivities(
+    @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
+    @Query('limit') limit: number = 25,
+  ) {
+    return await this.adminService.allActivities(page, limit);
   }
 }

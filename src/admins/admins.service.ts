@@ -105,7 +105,7 @@ export class AdminsService {
     await new this.activitiesRepository({
       category: 'welcome',
       title: `Welcome to QuickPocket`,
-      user: newAdmin?.id ?? newAdmin?._id,
+      admin: newAdmin?.id ?? newAdmin?._id,
     }).save();
 
     return {
@@ -158,7 +158,7 @@ export class AdminsService {
       status: 'success',
       title: `You updated ${updatedAdmin?.first_name} ${updatedAdmin?.last_name}'s profile on ${new Date().toLocaleString('en-GB')}`,
       type: 'profile',
-      email_address: user?.email_address,
+      admin: user?.id ?? user?._id,
     }).save();
 
     const { password, ...data } = updatedAdmin;
@@ -173,6 +173,176 @@ export class AdminsService {
       message: 'Profile updated successfully',
       user: data,
     };
+  }
+
+  async suspendAdmin(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.type !== 'superadmin' &&
+        adm.role !== 'manager' &&
+        adm.role !== 'developer' &&
+        adm.access !== 'read/write'
+      ) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'You do not hava necessary privileges for this action',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const foundAdmin = await this.adminRepository.findOne({
+        _id: id,
+      });
+      if (!foundAdmin) {
+        throw new HttpException(
+          'Admin record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await this.adminRepository
+        .updateOne(
+          { _id: foundAdmin?.id ?? foundAdmin?._id ?? id },
+          { $set: { status: 'suspended' } },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'admin',
+        title: `${adm?.first_name} ${adm?.last_name} suspended the admin account (${foundAdmin?.first_name} ${foundAdmin?.last_name}) on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Admin account suspended successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async pardonAdmin(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.type !== 'superadmin' &&
+        adm.role !== 'manager' &&
+        adm.role !== 'developer' &&
+        adm.access !== 'read/write'
+      ) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'You do not hava necessary privileges for this action',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const foundAdmin = await this.adminRepository.findOne({
+        _id: id,
+      });
+      if (!foundAdmin) {
+        throw new HttpException(
+          'Admin record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await this.adminRepository
+        .updateOne(
+          { _id: foundAdmin?.id ?? foundAdmin?._id ?? id },
+          { $set: { status: 'active' } },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'admin',
+        title: `${adm?.first_name} ${adm?.last_name} pardoned the admin account (${foundAdmin?.first_name} ${foundAdmin?.last_name}) on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Admin account pardoned successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteAdmin(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.type !== 'superadmin' &&
+        adm.role !== 'manager' &&
+        adm.access !== 'read/write'
+      ) {
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'You do not hava necessary privileges for this action',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const foundAdmin = await this.adminRepository.findOne({
+        _id: id,
+      });
+      if (!foundAdmin) {
+        throw new HttpException(
+          'Admin record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await new this.activitiesRepository({
+        category: 'admin',
+        title: `${adm?.first_name} ${adm?.last_name} deleted the admin account (${foundAdmin?.first_name} ${foundAdmin?.last_name}) on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      await this.adminRepository
+        .deleteOne({ _id: foundAdmin?.id ?? foundAdmin?._id ?? id })
+        .lean()
+        .exec();
+
+      return {
+        message: 'Admin account deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findBookings(page: number, limit: number) {
@@ -357,7 +527,7 @@ export class AdminsService {
       await new this.activitiesRepository({
         category: 'social',
         title: `${adm?.first_name} ${adm?.last_name} added a new social platform on ${Date.now().toLocaleString('en-US')}`,
-        user: adm?._id ?? adm?.id,
+        admin: adm?._id ?? adm?.id,
       }).save();
 
       return {
@@ -396,7 +566,7 @@ export class AdminsService {
       await new this.activitiesRepository({
         category: 'banner',
         title: `${adm?.first_name} ${adm?.last_name} added a new banner advert on ${Date.now().toLocaleString('en-US')}`,
-        user: adm?._id ?? adm?.id,
+        admin: adm?._id ?? adm?.id,
       }).save();
 
       return {
@@ -447,7 +617,7 @@ export class AdminsService {
       await new this.activitiesRepository({
         category: 'banner',
         title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundBanner?.title}) on ${Date.now().toLocaleString('en-US')}`,
-        user: adm?._id ?? adm?.id,
+        admin: adm?._id ?? adm?.id,
       }).save();
 
       return {
@@ -511,7 +681,7 @@ export class AdminsService {
       }
 
       const foundSocial = await this.socialRepository.findOne({
-        id: id,
+        _id: id,
       });
       if (!foundSocial) {
         throw new HttpException(
@@ -522,7 +692,7 @@ export class AdminsService {
 
       const updatedSocial = await this.socialRepository
         .updateOne(
-          { id: foundSocial?.id ?? foundSocial?._id ?? id },
+          { _id: foundSocial?.id ?? foundSocial?._id ?? id },
           {
             name: name,
             logo: logo,
@@ -535,7 +705,7 @@ export class AdminsService {
       await new this.activitiesRepository({
         category: 'social',
         title: `${adm?.first_name} ${adm?.last_name} updated ${foundSocial?.name} account info on ${Date.now().toLocaleString('en-US')}`,
-        user: adm?._id ?? adm?.id,
+        admin: adm?._id ?? adm?.id,
       }).save();
 
       return {
@@ -558,7 +728,7 @@ export class AdminsService {
       }
 
       const foundSocial = await this.socialRepository.findOne({
-        id: id,
+        _id: id,
       });
       if (!foundSocial) {
         throw new HttpException(
@@ -570,7 +740,7 @@ export class AdminsService {
       await new this.activitiesRepository({
         category: 'social',
         title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundSocial?.name}) on ${Date.now().toLocaleString('en-US')}`,
-        user: adm?._id ?? adm?.id,
+        admin: adm?._id ?? adm?.id,
       }).save();
 
       await this.socialRepository
@@ -608,10 +778,8 @@ export class AdminsService {
         throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
       }
 
-      const foundSettings = await this.settingsRepository.findOne({
-        email_address: email_address,
-      });
-      if (!foundSettings) {
+      const foundSettings = await this.settingsRepository.find({});
+      if (foundSettings.length < 1) {
         // Create new
         await new this.settingsRepository({
           phone_number: phone_number,
@@ -624,13 +792,13 @@ export class AdminsService {
         await new this.activitiesRepository({
           category: 'settings',
           title: `${adm?.first_name} ${adm?.last_name} initialized platform settings on ${Date.now().toLocaleString('en-US')}`,
-          user: adm?._id ?? adm?.id,
+          admin: adm?._id ?? adm?.id,
         }).save();
       } else {
         // Update current
         await this.settingsRepository
           .updateOne(
-            { _id: foundSettings?.id ?? foundSettings?._id },
+            { _id: foundSettings[0]?.id ?? foundSettings[0]?._id },
             {
               phone_number: phone_number,
               email_address: appEmail,
@@ -658,5 +826,30 @@ export class AdminsService {
 
   async findSettings() {
     return await this.settingsRepository.find({}).lean().exec();
+  }
+
+  async allActivities(page: number, limit: number) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.activitiesRepository
+        .find({})
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .populate(
+          'admin',
+          'first_name last_name email_address phone_number photoUrl role type',
+        )
+        .exec(),
+      this.activitiesRepository.countDocuments(), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
   }
 }

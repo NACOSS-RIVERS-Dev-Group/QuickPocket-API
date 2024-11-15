@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { json } from 'express';
 // import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 
 async function bootstrap() {
@@ -14,9 +15,11 @@ async function bootstrap() {
   //   // maxAge: 5,
   // };
 
+  app.use(json({ limit: '10mb' }));
+
   app.enableCors();
   app.setGlobalPrefix('api/v1');
 
-  await app.listen(6000);
+  await app.listen(5000);
 }
 bootstrap();

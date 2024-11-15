@@ -159,7 +159,6 @@ export class AdminAuthService {
       // Save/Update OTP code for user here
       const currentUserOTP =
         await this.otpService.findOTPByEmail(email_address);
-      console.log("CURRENT ADMIN'S OTP ", currentUserOTP);
 
       if (currentUserOTP) {
         // OTP Already exists for this user so update it here
@@ -258,6 +257,16 @@ export class AdminAuthService {
       });
     }
 
+    if (adminDB?.status === 'suspended') {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Your account is under suspension',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // Now compare passwords before login
     if (
       adminDB &&
@@ -271,16 +280,11 @@ export class AdminAuthService {
           last_login: adminDB?.next_login ?? new Date(),
         },
       );
-      // await this.adminService.updateAdmin(adminDB?.email_address, {
-      //   next_login: new Date(),
-      //   last_login: adminDB?.next_login ?? new Date(),
-      // });
 
       await new this.activitiesRepository({
-        status: 'success',
         title: `You logged into your Quickpocket admin portal on ${new Date().toLocaleString('en-GB')}`,
-        type: 'login',
-        email_address: loginAdminDTO?.email_address,
+        category: 'login',
+        admin: adminDB?._id ?? adminDB?.id,
       }).save();
 
       const usere = await this.adminService.findAdminById(
@@ -399,13 +403,6 @@ export class AdminAuthService {
     await this.adminService.updateAdmin(adminData?.id, {
       password: hashed,
     });
-
-    // await this.historyService.saveHistory({
-    //   status: 'success',
-    //   title: 'Your Afrikunet account password was reset',
-    //   type: 'password',
-    //   email_address: email_address,
-    // });
 
     return {
       message: 'Password reset successfully',

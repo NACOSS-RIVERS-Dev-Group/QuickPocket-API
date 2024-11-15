@@ -70,6 +70,9 @@ export class Admin {
 
   @Prop()
   last_login: Date;
+
+  @Prop({ enum: ['active', 'suspended'], default: 'active' })
+  status: string;
 }
 
 export const AdminSchema = SchemaFactory.createForClass(Admin);

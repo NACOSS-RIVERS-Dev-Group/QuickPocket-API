@@ -230,6 +230,25 @@ export class AuthService {
           };
         }
       } else {
+        if (userDB?.status === 'suspended') {
+          throw new HttpException(
+            {
+              status: HttpStatus.BAD_REQUEST,
+              message: 'Your account is under suspension',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        if (userDB?.status === 'deleted') {
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              message: 'Account no longer exist',
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        }
         // update last_login here
         await this.userService.updateUser(userDB?.email_address, {
           next_login: new Date(),

@@ -44,11 +44,11 @@ import { Settings, SettingsSchema } from './schemas/settings.schema';
     }),
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.gmail.com',
+        host: 'rbx116.truehost.cloud',
         port: 465,
         auth: {
-          user: 'app.quickpocket@gmail.com',
-          pass: 'savhpzwofeqzrhcd',
+          user: 'hello@quickpocket.co', // 'app.quickpocket@gmail.com',
+          pass: '$10Password!!', // 'savhpzwofeqzrhcd',
         },
       },
     }),

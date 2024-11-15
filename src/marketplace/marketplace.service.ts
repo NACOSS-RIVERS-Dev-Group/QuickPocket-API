@@ -3,6 +3,8 @@ import { AddMarketplaceItem } from './dto/AddMarketplaceItem';
 import { MarketPlace } from 'src/schemas/marketplace.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Admin } from 'src/schemas/admin.schema';
+import { Activities } from 'src/schemas/activities.schema';
 // import { Repository } from 'typeorm';
 
 @Injectable()
@@ -10,6 +12,9 @@ export class MarketplaceService {
   constructor(
     @InjectModel(MarketPlace.name)
     private marketplaceRepository: Model<MarketPlace>,
+    @InjectModel(Admin.name) private adminRepository: Model<Admin>,
+    @InjectModel(Activities.name)
+    private activitiesRepository: Model<Activities>,
   ) {}
 
   async addMarketplaceItem({
@@ -36,17 +41,51 @@ export class MarketplaceService {
     }
 
     const item = await this.marketplaceRepository.findOne({
-      id: id,
+      _id: id,
     });
     if (!item)
       throw new HttpException('No record found.', HttpStatus.NOT_FOUND);
 
-    await this.marketplaceRepository.updateOne(id, { ...payload });
+    await this.marketplaceRepository.updateOne({ _id: id }, payload);
     const updatedItem = await this.marketplaceRepository.findOne({
-      id,
+      _id: id,
     });
 
     return updatedItem;
+  }
+
+  async deleteMarketplaceItem(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      const foundItem = await this.marketplaceRepository.findOne({
+        _id: id,
+      });
+      if (!foundItem) {
+        throw new HttpException('Banner not found.', HttpStatus.NOT_FOUND);
+      }
+
+      await new this.activitiesRepository({
+        category: 'product',
+        title: `${adm?.first_name} ${adm?.last_name} update banner advert (${foundItem?.title}) on ${Date.now().toLocaleString('en-US')}`,
+        user: adm?._id ?? adm?.id,
+      }).save();
+
+      await this.marketplaceRepository.deleteOne({ _id: id });
+
+      return {
+        message: 'Product deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async all(page: number, limit: number) {

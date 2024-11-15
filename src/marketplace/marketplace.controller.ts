@@ -58,9 +58,15 @@ export class MarketplaceController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('update')
+  @Post(':id/update')
   async update(@Body() body: AddMarketplaceItem, @Req() req: any) {
-    return this.service.updateMarketplaceItem(body, req?.user?.sub);
+    return this.service.updateMarketplaceItem(body, req?.params?.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/delete')
+  async delete(@Req() req: any) {
+    return this.service.deleteMarketplaceItem(req?.user?.sub, req?.params?.id);
   }
 
   @UseGuards(JwtAuthGuard)

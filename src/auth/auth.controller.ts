@@ -23,6 +23,7 @@ import { LoginUserDTO } from 'src/users/dtos/loginuser.dto';
 import { AdminAuthService } from 'src/adminauth/adminauth.service';
 import { CreateAdminDTO } from 'src/admins/dtos/createadmin.dto';
 import { LoginAdminDTO } from 'src/adminauth/dto/login.dto';
+import { OTPPayloadDTO } from 'src/otp/dto/otp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -203,13 +204,28 @@ export class AuthController {
   }
 
   @Post('admin/verify')
-  async adminVerifyAccount(@Req() req: Request) {
-    console.log('REQUEST USER ::: ', req.user);
-    const { code, email_address } = req.body;
-    const verifier = await this.adminAuthService.validateVerifyOTP({
-      code: code,
-      email_address: email_address,
-    });
+  @UsePipes(
+    new ValidationPipe({
+      exceptionFactory: (errors: ValidationError[]) => {
+        const validationErrors = errors.map((error) => ({
+          field: error.property,
+          errors: Object.values(error.constraints || {}),
+        }));
+
+        // Extract the first error message from the validation errors
+        // const firstErrorField = validationErrors[0].field;
+        const firstErrorMessage = validationErrors[0].errors[0];
+
+        return new BadRequestException({
+          statusCode: 400,
+          message: `${firstErrorMessage}`,
+          errors: validationErrors,
+        });
+      },
+    }),
+  )
+  async adminVerifyAccount(@Body() body: OTPPayloadDTO) {
+    const verifier = await this.adminAuthService.validateVerifyOTP(body);
 
     return verifier;
   }
