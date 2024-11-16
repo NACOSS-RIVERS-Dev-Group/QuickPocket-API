@@ -27,9 +27,8 @@ import { Appointment, AppointmentSchema } from './schemas/appointments.schema';
 import { Social, SocialSchema } from './schemas/socials.schema';
 import { Banner, BannerSchema } from './schemas/banner.schema';
 import { Settings, SettingsSchema } from './schemas/settings.schema';
-// import { AdminAuthService } from './adminauth/adminauth.service';
-// import { AdminsService } from './admins/admins.service';
-// import { Admin } from './schemas/admin.schema';
+import { LocationSchema, Location } from './schemas/location.schema';
+import { Reason, ReasonSchema } from './schemas/reasons.schema';
 
 @Module({
   imports: [
@@ -70,6 +69,8 @@ import { Settings, SettingsSchema } from './schemas/settings.schema';
       { name: Social.name, schema: SocialSchema },
       { name: Banner.name, schema: BannerSchema },
       { name: Settings.name, schema: SettingsSchema },
+      { name: Location.name, schema: LocationSchema },
+      { name: Reason.name, schema: ReasonSchema },
     ]),
   ],
   controllers: [AppController],

@@ -19,6 +19,8 @@ import { JwtStrategy } from 'src/adminauth/utils/jwt_strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
+import { Location, LocationSchema } from 'src/schemas/location.schema';
+import { Reason, ReasonSchema } from 'src/schemas/reasons.schema';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
       { name: OTP.name, schema: OTPSchema },
       { name: User.name, schema: UserSchema },
       { name: Settings.name, schema: SettingsSchema },
+      { name: Location.name, schema: LocationSchema },
+      { name: Reason.name, schema: ReasonSchema },
     ]),
     PassportModule,
     JwtModule.register({

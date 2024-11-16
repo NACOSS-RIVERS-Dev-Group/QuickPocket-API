@@ -19,6 +19,8 @@ import {
 import { Banner, BannerSchema } from 'src/schemas/banner.schema';
 import { Social, SocialSchema } from 'src/schemas/socials.schema';
 import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
+import { LocationSchema, Location } from 'src/schemas/location.schema';
+import { Reason, ReasonSchema } from 'src/schemas/reasons.schema';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
       { name: Social.name, schema: SocialSchema },
       { name: Banner.name, schema: BannerSchema },
       { name: Settings.name, schema: SettingsSchema },
+      { name: Location.name, schema: LocationSchema },
+      { name: Reason.name, schema: ReasonSchema },
     ]),
     PassportModule,
     JwtModule.register({

@@ -13,6 +13,12 @@ export class Settings {
 
   @Prop()
   office_address: string;
+
+  @Prop({ default: 'robos' })
+  get_started: string;
+
+  @Prop({ default: 'trivos' })
+  get_started_title: string;
 }
 
 export const SettingsSchema = SchemaFactory.createForClass(Settings);

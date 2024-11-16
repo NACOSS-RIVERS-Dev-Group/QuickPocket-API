@@ -16,6 +16,8 @@ import { Social } from 'src/schemas/socials.schema';
 import { AddBannerDTO } from './dtos/addbanner.dto';
 import { Banner } from 'src/schemas/banner.schema';
 import { Settings } from 'src/schemas/settings.schema';
+import { Location } from 'src/schemas/location.schema';
+import { Reason } from 'src/schemas/reasons.schema';
 
 @Injectable()
 export class AdminsService {
@@ -31,6 +33,10 @@ export class AdminsService {
     private bannerRepository: Model<Banner>,
     @InjectModel(Settings.name)
     private settingsRepository: Model<Settings>,
+    @InjectModel(Location.name)
+    private locationsRepository: Model<Location>,
+    @InjectModel(Reason.name)
+    private reasonsRepository: Model<Reason>,
   ) {}
 
   async findAdmins(page: number, limit: number) {
@@ -765,8 +771,18 @@ export class AdminsService {
     return await this.bannerRepository.find({}).lean().exec();
   }
 
+  async getActiveBanners() {
+    return await this.bannerRepository.find({ status: 'active' }).lean().exec();
+  }
+
   async manageSettings(
-    { email_address: appEmail, phone_number, office_address }: any,
+    {
+      email_address: appEmail,
+      phone_number,
+      office_address,
+      get_started,
+      get_started_title,
+    }: any,
     email_address: string,
   ) {
     try {
@@ -785,6 +801,8 @@ export class AdminsService {
           phone_number: phone_number,
           email_address: appEmail,
           office_address: office_address,
+          get_started: get_started,
+          get_started_title: get_started_title,
           created_at: new Date(),
           updated_at: new Date(),
         }).save();
@@ -803,6 +821,8 @@ export class AdminsService {
               phone_number: phone_number,
               email_address: appEmail,
               office_address: office_address,
+              get_started: get_started,
+              get_started_title: get_started_title,
             },
           )
           .lean()
@@ -851,5 +871,323 @@ export class AdminsService {
       totalItems: total,
       perPage: limit,
     };
+  }
+
+  async saveLocation({ region, city }: any, email_address: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      await new this.locationsRepository({
+        city: city,
+        region: region,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }).save();
+
+      await new this.activitiesRepository({
+        category: 'location',
+        title: `${adm?.first_name} ${adm?.last_name} added a new location on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Location added successfully.',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateLocation(
+    { region, city }: any,
+    email_address: string,
+    id: string,
+  ) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const foundLocation = await this.locationsRepository.findOne({
+        _id: id,
+      });
+      if (!foundLocation) {
+        throw new HttpException(
+          'Location record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const updatedLocation = await this.locationsRepository
+        .updateOne(
+          { _id: foundLocation?.id ?? foundLocation?._id ?? id },
+          {
+            city: city,
+            region: region,
+          },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'location',
+        title: `${adm?.first_name} ${adm?.last_name} updated location ${foundLocation?.city} on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Location was updated successfully',
+        data: updatedLocation,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteLocation(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const foundLocation = await this.locationsRepository.findOne({
+        _id: id,
+      });
+      if (!foundLocation) {
+        throw new HttpException(
+          'Location record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await new this.activitiesRepository({
+        category: 'location',
+        title: `${adm?.first_name} ${adm?.last_name} deleted location on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      await this.locationsRepository
+        .deleteOne({ _id: foundLocation?.id ?? foundLocation?._id ?? id })
+        .lean()
+        .exec();
+
+      return {
+        message: 'Location deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getLocations() {
+    return await this.locationsRepository.find({}).lean().exec();
+  }
+
+  async saveReason({ title }: any, email_address: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      await new this.reasonsRepository({
+        title: title,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }).save();
+
+      await new this.activitiesRepository({
+        category: 'location',
+        title: `${adm?.first_name} ${adm?.last_name} added a new reason on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Reason added successfully.',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateReason(payload: any, email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const foundReason = await this.reasonsRepository.findOne({
+        _id: id,
+      });
+      if (!foundReason) {
+        throw new HttpException(
+          'Reason record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const updatedReason = await this.reasonsRepository
+        .updateOne(
+          { _id: foundReason?.id ?? foundReason?._id ?? id },
+          {
+            $set: payload,
+          },
+        )
+        .lean()
+        .exec();
+
+      await new this.activitiesRepository({
+        category: 'location',
+        title: `${adm?.first_name} ${adm?.last_name} updated reason ${foundReason?.title} on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      return {
+        message: 'Reason was updated successfully',
+        data: updatedReason,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteReason(email_address: string, id: string) {
+    try {
+      //First check if user exist and marketplace exists
+      const adm = await this.adminRepository.findOne({
+        email_address: email_address,
+      });
+      if (!adm) {
+        throw new HttpException('No admin found.', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        adm.role !== AdminRoles.MANAGER &&
+        adm.role !== AdminRoles.DEVELOPER &&
+        adm.role !== AdminRoles.EDITOR &&
+        adm.access !== AccessRights.READ_WRITE
+      ) {
+        throw new HttpException(
+          'You do not have the right privilege.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const foundReason = await this.reasonsRepository.findOne({
+        _id: id,
+      });
+      if (!foundReason) {
+        throw new HttpException(
+          'Reason record not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      await new this.activitiesRepository({
+        category: 'reason',
+        title: `${adm?.first_name} ${adm?.last_name} deleted location on ${Date.now().toLocaleString('en-US')}`,
+        admin: adm?._id ?? adm?.id,
+      }).save();
+
+      await this.reasonsRepository
+        .deleteOne({ _id: foundReason?.id ?? foundReason?._id ?? id })
+        .lean()
+        .exec();
+
+      return {
+        message: 'Reason deleted successfully',
+        data: null,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getReasons() {
+    return await this.reasonsRepository.find({}).lean().exec();
   }
 }

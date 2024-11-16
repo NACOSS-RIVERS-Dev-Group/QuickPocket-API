@@ -32,15 +32,8 @@ import { Admin, AdminSchema } from 'src/schemas/admin.schema';
 import { Social, SocialSchema } from 'src/schemas/socials.schema';
 import { Banner, BannerSchema } from 'src/schemas/banner.schema';
 import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
-// import { MailService } from 'src/mail/mail.service';
-// import { Otp } from 'src/typeorm/entities/otp';
-// import { OtpService } from 'src/otp/otp.service';
-// import { GoogleStrategy } from './utils/google_strategy';
-// import { History } from 'src/typeorm/entities/history';
-// import { HistoryService } from 'src/history/history.service';
-// import { SocketGateway } from 'src/socket/socket.gateway';
-// import { SocketService } from 'src/socket/socket.service';
-// import { Customer } from 'src/typeorm/entities/customers';
+import { LocationSchema, Location } from 'src/schemas/location.schema';
+import { Reason, ReasonSchema } from 'src/schemas/reasons.schema';
 
 @Module({
   imports: [
@@ -57,6 +50,8 @@ import { Settings, SettingsSchema } from 'src/schemas/settings.schema';
       { name: Social.name, schema: SocialSchema },
       { name: Banner.name, schema: BannerSchema },
       { name: Settings.name, schema: SettingsSchema },
+      { name: Location.name, schema: LocationSchema },
+      { name: Reason.name, schema: ReasonSchema },
     ]),
     PassportModule,
     JwtModule.register({
