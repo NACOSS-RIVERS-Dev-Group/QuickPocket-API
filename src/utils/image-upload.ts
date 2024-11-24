@@ -34,34 +34,3 @@ export const uploadMultipleImages = (imageBuffers) => {
   const uploads = imageBuffers.map((imageBuffer) => uploadImage(imageBuffer));
   return Promise.all(uploads);
 };
-
-// export const uploadImage = (image: any) => {
-//   //imgage = > base64
-//   return new Promise((resolve, reject) => {
-//     v2.uploader.upload(
-//       image,
-//       {
-//         overwrite: true,
-//         invalidate: true,
-//         resource_type: 'auto',
-//       },
-//       (error, result) => {
-//         if (result && result.secure_url) {
-//           console.log(result.secure_url);
-//           return resolve(result.secure_url);
-//         }
-//         console.log(error.message);
-//         return reject({ message: error.message });
-//       },
-//     );
-//   });
-// };
-
-// export const uploadMultipleImages = (images: any[]) => {
-//   return new Promise((resolve, reject) => {
-//     const uploads = images.map((base: any) => uploadImage(base));
-//     Promise.all(uploads)
-//       .then((values) => resolve(values))
-//       .catch((err) => reject(err));
-//   });
-// };

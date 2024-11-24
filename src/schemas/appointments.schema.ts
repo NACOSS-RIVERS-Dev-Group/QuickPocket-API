@@ -1,24 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { User } from './user.schema';
+import { Reason } from './reasons.schema';
 
 export type AppointmentDocument = HydratedDocument<Appointment>;
 
 @Schema({ timestamps: true })
 export class Appointment {
-  @Prop({
-    enum: [
-      'education',
-      'medical',
-      'rent',
-      'travel',
-      'business',
-      'events',
-      'house keep',
-      'others',
-    ],
-  })
-  reason: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Reason' })
+  reason: Reason;
 
   @Prop({ enum: ['fast-track', 'working-class', 'book-session'] })
   category: string;

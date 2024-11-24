@@ -334,4 +334,16 @@ export class UsersController {
   async deleteAccountWeb(@Body() body: AccountDeletionWebDTO) {
     return await this.userService.requestAccountDeletionWeb(body);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('bookings')
+  async userBookings(
+    @Req() req: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 25,
+  ) {
+    console.log('ENTERED Boominf PART ::: ');
+
+    return await this.userService.findBookings(page, limit, req.user?.sub);
+  }
 }

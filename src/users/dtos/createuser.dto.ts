@@ -10,18 +10,18 @@ import {
   IsBoolean,
 } from 'class-validator';
 export class CreateUserDTO {
-  @IsNotEmpty({ message: "First name is required" })
+  @IsNotEmpty({ message: 'First name is required' })
   @IsString()
   @IsAlpha()
   first_name: string;
 
-  @IsNotEmpty({ message: "Last name is required" })
+  @IsNotEmpty({ message: 'Last name is required' })
   @IsString()
   @IsAlpha()
   last_name: string;
 
-  @IsEmail({}, { message: "Enter a valid email address" })
-  @IsNotEmpty({ message: "Email address is required" })
+  @IsEmail({}, { message: 'Enter a valid email address' })
+  @IsNotEmpty({ message: 'Email address is required' })
   email_address: string;
 
   @IsNotEmpty()

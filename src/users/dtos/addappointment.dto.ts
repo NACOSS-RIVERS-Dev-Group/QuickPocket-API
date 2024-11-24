@@ -14,22 +14,10 @@ enum AppointmentType {
   WORKING_CLASS = 'working-class',
 }
 
-enum ReasonType {
-  EDUCATION = 'education',
-  MEDICAL = 'medical',
-  RENT = 'rent',
-  TRAVEL = 'travel',
-  BUSINESS = 'business',
-  EVENTS = 'events',
-  OTHERS = 'others',
-  HOUSE_KEEP = 'house keep',
-}
-
 export class AddAppointmentDTO {
   @IsNotEmpty()
   @IsString()
-  @IsEnum(ReasonType)
-  reason: ReasonType;
+  reason: string;
 
   @IsNotEmpty()
   @IsString()

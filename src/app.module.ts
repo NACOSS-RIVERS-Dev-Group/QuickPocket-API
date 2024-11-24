@@ -43,11 +43,11 @@ import { Reason, ReasonSchema } from './schemas/reasons.schema';
     }),
     MailerModule.forRoot({
       transport: {
-        host: 'rbx116.truehost.cloud',
+        host: 'smtp.gmail.com', //  'rbx116.truehost.cloud',
         port: 465,
         auth: {
-          user: 'hello@quickpocket.co', // 'app.quickpocket@gmail.com',
-          pass: '$10Password!!', // 'savhpzwofeqzrhcd',
+          user: 'app.quickpocket@gmail.com', // 'hello@quickpocket.co'
+          pass: 'savhpzwofeqzrhcd', // '$10Password!!',
         },
       },
     }),

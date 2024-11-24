@@ -475,4 +475,40 @@ export class UserService {
       perPage: limit,
     };
   }
+
+  async findBookings(page: number, limit: number, email_address: string) {
+    // Get user data first
+    const userObj = await this.userRepository
+      .findOne({ email_address: email_address })
+      .lean()
+      .exec();
+
+    if (!userObj) {
+      throw new HttpException('User record not found', HttpStatus.NOT_FOUND);
+    }
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.appointmentRepository
+        .find({
+          user: userObj?._id,
+        })
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .populate('reason')
+        .populate('user')
+        .exec(),
+      this.appointmentRepository.countDocuments({ user: userObj?._id }), // Count total documents for calculating total pages
+    ]);
+
+    console.log('Bookings ::::', data);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
+  }
 }
