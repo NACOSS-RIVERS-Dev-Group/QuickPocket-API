@@ -361,6 +361,8 @@ export class AdminsService {
           'user',
           'first_name last_name email_address phone_number photoUrl',
         )
+        .populate('reason')
+        .populate('location')
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .exec(),

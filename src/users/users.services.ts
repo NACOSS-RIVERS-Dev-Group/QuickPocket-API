@@ -496,6 +496,7 @@ export class UserService {
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .populate('reason')
+        .populate('location')
         .populate('user')
         .exec(),
       this.appointmentRepository.countDocuments({ user: userObj?._id }), // Count total documents for calculating total pages

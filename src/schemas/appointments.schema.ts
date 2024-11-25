@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { User } from './user.schema';
 import { Reason } from './reasons.schema';
+import { Location } from './location.schema';
 
 export type AppointmentDocument = HydratedDocument<Appointment>;
 
@@ -13,8 +14,8 @@ export class Appointment {
   @Prop({ enum: ['fast-track', 'working-class', 'book-session'] })
   category: string;
 
-  @Prop()
-  location: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Location' })
+  location: Location;
 
   @Prop()
   amount: number;
