@@ -218,11 +218,15 @@ export class AdminAuthService {
 
     await this.otpService.removeOTP(otpDb?.email_address);
     // Now set user's email_verified to true
-    await this.adminService.updateAdmin(adminDb?.email_address, {
-      is_email_verified: true,
-      last_login: new Date(),
-      next_login: new Date(),
-    });
+    await this.adminService.updateAdmin(
+      adminDb?.email_address,
+      adminDb?.id ?? adminDb?._id,
+      {
+        is_email_verified: true,
+        last_login: new Date(),
+        next_login: new Date(),
+      },
+    );
 
     const admini = await this.adminService.findAdminByUsername(
       otpPayload?.email_address,
@@ -400,9 +404,13 @@ export class AdminAuthService {
 
     // Now hash the current password and update
     const hashed = await encodePassword(new_password);
-    await this.adminService.updateAdmin(adminData?.id, {
-      password: hashed,
-    });
+    await this.adminService.updateAdmin(
+      adminData?.email_address,
+      adminData?.id,
+      {
+        password: hashed,
+      },
+    );
 
     return {
       message: 'Password reset successfully',

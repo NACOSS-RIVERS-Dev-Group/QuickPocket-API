@@ -55,6 +55,16 @@ export class AdminsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Put('admin/:id/update')
+  async updateAdmin(@Req() req: any) {
+    return await this.adminService.updateAdmin(
+      req?.user?.sub,
+      req?.params?.id,
+      req?.body,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('admin/:id/delete')
   async deleteAdmin(@Req() req: any) {
     return await this.adminService.deleteAdmin(req?.user?.sub, req?.params?.id);

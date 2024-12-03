@@ -39,7 +39,7 @@ import { Reason, ReasonSchema } from './schemas/reasons.schema';
     PassportModule,
     JwtModule.register({
       secret: 'abc123JakasMan123@09nmdhyuDiloe((30(())',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '5d' },
     }),
     MailerModule.forRoot({
       transport: {

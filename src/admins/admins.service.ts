@@ -135,7 +135,7 @@ export class AdminsService {
     return this.adminRepository.findById(id).lean().exec();
   }
 
-  async updateAdmin(email_address: string, payload: any) {
+  async updateAdmin(email_address: string, id: string, payload: any) {
     // console.log('PAYLOAD PROFILE UPDATE ::: ', payload);
 
     if (!payload) {
@@ -149,34 +149,25 @@ export class AdminsService {
     if (!user)
       throw new HttpException('No record found.', HttpStatus.NOT_FOUND);
 
-    await this.adminRepository.updateOne(
-      { email_address: email_address },
-      { ...payload },
-    );
+    await this.adminRepository.updateOne({ _id: id }, { ...payload });
     const updatedAdmin = await this.adminRepository
       .findOne({
-        email_address: email_address,
+        _id: id,
       })
       .lean()
       .exec();
 
     await new this.activitiesRepository({
-      status: 'success',
+      category: 'profile',
       title: `You updated ${updatedAdmin?.first_name} ${updatedAdmin?.last_name}'s profile on ${new Date().toLocaleString('en-GB')}`,
-      type: 'profile',
       admin: user?.id ?? user?._id,
     }).save();
 
     const { password, ...data } = updatedAdmin;
     console.log('REMOVED PASWORD ::: ', password);
 
-    global.io?.emit('profile-updated', {
-      message: 'You updated your profile',
-      user: data,
-    });
-
     return {
-      message: 'Profile updated successfully',
+      message: 'Admin profile updated successfully',
       user: data,
     };
   }
