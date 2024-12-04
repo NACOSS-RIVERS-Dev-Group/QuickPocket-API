@@ -61,7 +61,9 @@ export class CreateAdminDTO {
   @IsEnum(AdminType)
   type: AdminType;
 
-  @IsNotEmpty({ message: 'Address is required' })
+  @IsNotEmpty({ message: 'Location is required' })
   @IsString()
+  location: string;
+
   address: string;
 }

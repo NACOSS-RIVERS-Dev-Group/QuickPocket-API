@@ -99,6 +99,7 @@ export class AdminAuthService {
       phone_number: adminData?.phone_number,
       role: adminData?.role,
       type: adminData?.type,
+      location
     });
 
     const emailSent = await this.mailerService.sendMail({

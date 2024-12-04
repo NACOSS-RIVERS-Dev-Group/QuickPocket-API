@@ -45,6 +45,7 @@ export class AdminsService {
     const [data, total] = await Promise.all([
       this.adminRepository
         .find({})
+        .populate('location')
         .skip(skip) // Skip the records
         .limit(limit) // Limit the number of records returned
         .exec(),
@@ -99,11 +100,12 @@ export class AdminsService {
       phone_number: createAdmin?.phone_number,
       role: createAdmin?.role,
       access: createAdmin?.access,
+      location: createAdmin?.location,
       is_email_verified: false,
       is_profile_set: false,
       type: createAdmin?.type,
       photo: '',
-      address: createAdmin.address,
+      address: createAdmin.address ?? 'lagos',
       created_at: new Date(),
       updated_at: new Date(),
     }).save();
