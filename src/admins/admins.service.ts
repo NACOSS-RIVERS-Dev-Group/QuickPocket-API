@@ -409,6 +409,35 @@ export class AdminsService {
     };
   }
 
+  async findBookingsApproved(page: number, limit: number) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.appointmentRepository
+        .find({
+          status: { $in: ['booked', 'completed'] },
+        })
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .populate(
+          'user',
+          'first_name last_name email_address phone_number photoUrl',
+        )
+        .exec(),
+      this.appointmentRepository.countDocuments({
+        status: { $in: ['booked', 'completed'] },
+      }), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
+  }
+
   async approveBooking(id: string, email_address: string) {
     //First check admin and if they have the right privilege
 

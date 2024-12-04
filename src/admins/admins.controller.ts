@@ -80,6 +80,15 @@ export class AdminsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('bookings/approved/all')
+  async approvedBookings(
+    @Query('page') page: number = 1, // Capture the 'page' query param (optional, with default value)
+    @Query('limit') limit: number = 25,
+  ) {
+    return await this.adminService.findBookingsApproved(page, limit);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('bookings/category/all')
   async categoryBookings(
     @Query('category') category: string,
