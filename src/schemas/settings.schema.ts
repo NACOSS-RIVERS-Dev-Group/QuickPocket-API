@@ -14,10 +14,10 @@ export class Settings {
   @Prop()
   office_address: string;
 
-  @Prop({ default: 'robos' })
+  @Prop({ default: ' ' })
   get_started: string;
 
-  @Prop({ default: 'trivos' })
+  @Prop({ default: ' ' })
   get_started_title: string;
 }
 

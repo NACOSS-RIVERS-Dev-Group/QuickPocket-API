@@ -4,7 +4,25 @@ import { Admin } from './admin.schema';
 
 export type ActivitiesDocument = HydratedDocument<Activities>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true, // Include virtual fields
+    versionKey: false, // Disable __v field
+    transform(doc, ret) {
+      ret.id = ret._id; // You can optionally add the id field
+      delete ret.password; // Remove sensitive data like password
+    },
+  },
+  toObject: {
+    virtuals: true, // Include virtual fields
+    versionKey: false, // Disable __v field
+    transform(doc, ret) {
+      ret.id = ret._id; // You can optionally add the id field
+      delete ret.password; // Remove sensitive data like password
+    },
+  },
+})
 export class Activities {
   @Prop()
   title: string;
