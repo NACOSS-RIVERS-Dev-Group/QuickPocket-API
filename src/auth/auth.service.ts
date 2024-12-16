@@ -11,10 +11,7 @@ import {
 } from 'src/utils/email';
 import { generateOTP } from 'src/utils/otp_generator';
 import * as bcrypt from 'bcrypt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { OtpService } from 'src/otp/otp.service';
-import { NotificationService } from 'src/notification/notification.service';
 import { OTPPayloadDTO } from 'src/otp/dto/otp.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
