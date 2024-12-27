@@ -14,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { OtpService } from 'src/otp/otp.service';
 import { OTPPayloadDTO } from 'src/otp/dto/otp.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import sendOTP from 'src/utils/sms-sender';
 
 @Injectable()
 export class AuthService {
@@ -83,6 +84,11 @@ export class AuthService {
       code: otpCode,
     });
 
+    await sendOTP({
+      message: `Use the OTP code below to complete your registration ${otpCode}`,
+      phone_number: userData.phone_number,
+    });
+
     if (emailSent) {
       return {
         message: 'Email sent successfully',
@@ -127,6 +133,11 @@ export class AuthService {
       code: otpCode,
     });
 
+    await sendOTP({
+      message: `QUickPocket: Use the OTP code ${otpCode}`,
+      phone_number: userData.phone_number,
+    });
+
     if (emailSent) {
       return {
         message: 'OTP email sent successfully',
@@ -165,12 +176,12 @@ export class AuthService {
         next_login: new Date(),
       },
     );
-    console.log('USER UPDATED ::: ', updatedUser);
 
     const payload = {
       sub: userDb?.email_address,
       username: userDb?.first_name,
     };
+
     return {
       accessToken: await this.jwtService.signAsync(payload),
       user: updatedUser,
@@ -305,6 +316,11 @@ export class AuthService {
       code: otpCode,
     });
 
+    await sendOTP({
+      message: `QUickPocket: Use the OTP code ${otpCode}`,
+      phone_number: userData.phone_number,
+    });
+
     if (emailSent) {
       return {
         message: 'OTP code sent to email successfully',
@@ -357,13 +373,6 @@ export class AuthService {
     await this.userService.updateUser(userData?.email_address, {
       password: hashed,
     });
-
-    // await this.historyService.saveHistory({
-    //   status: 'success',
-    //   title: 'Your Afrikunet account password was reset',
-    //   type: 'password',
-    //   email_address: email_address,
-    // });
 
     return {
       message: 'Password reset successfully',

@@ -409,6 +409,34 @@ export class AdminsService {
     };
   }
 
+  async allBookingStatus(page: number, limit: number, status: string) {
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    const [data, total] = await Promise.all([
+      this.appointmentRepository
+        .find({
+          status: status.toLowerCase(),
+        })
+        .populate('user')
+        .populate('reason')
+        .populate('location')
+        .skip(skip) // Skip the records
+        .limit(limit) // Limit the number of records returned
+        .exec(),
+      this.appointmentRepository.countDocuments({
+        status: status.toLowerCase(),
+      }), // Count total documents for calculating total pages
+    ]);
+
+    return {
+      data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      perPage: limit,
+    };
+  }
+
   async findBookingsApproved(page: number, limit: number) {
     const skip = (page - 1) * limit; // Calculate the number of records to skip
 

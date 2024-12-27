@@ -56,7 +56,7 @@ import { Reason, ReasonSchema } from 'src/schemas/reasons.schema';
     PassportModule,
     JwtModule.register({
       secret: 'abc123JakasMan123@09nmdhyuDiloe((30(())',
-      signOptions: { expiresIn: '5h' },
+      signOptions: { expiresIn: '90d' },
     }),
   ],
   controllers: [AuthController],

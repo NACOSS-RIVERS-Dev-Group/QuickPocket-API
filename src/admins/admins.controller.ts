@@ -89,6 +89,16 @@ export class AdminsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('bookings/all/status')
+  async bookingsByStatus(
+    @Query('status') status: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 25,
+  ) {
+    return this.adminService.allBookingStatus(page, limit, status);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('bookings/category/all')
   async categoryBookings(
     @Query('category') category: string,
